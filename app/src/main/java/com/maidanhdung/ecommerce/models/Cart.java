@@ -1,37 +1,46 @@
 package com.maidanhdung.ecommerce.models;
 
 public class Cart {
-    String ProductName, Price, ImageURL;
+    String productName, price, imageURL, Quality;
 
     public Cart() {}
 
-    public Cart(String productName, String price, String imageURL) {
-        ProductName = productName;
-        Price = price;
-        ImageURL = imageURL;
+    public Cart(String productName, String price, String imageURL, String quality) {
+        this.productName = productName;
+        this.price = price;
+        this.imageURL = imageURL;
+        Quality = quality;
     }
 
-    public String getImageURL() {
-        return ImageURL;
+    public String getQuality() {
+        return Quality;
     }
 
-    public void setImageURL(String imageURL) {
-        ImageURL = imageURL;
+    public void setQuality(String quality) {
+        Quality = quality;
     }
 
     public String getProductName() {
-        return ProductName;
+        return productName;
     }
 
     public void setProductName(String productName) {
-        ProductName = productName;
+        this.productName = productName;
     }
 
     public String getPrice() {
-        return Price;
+        return price;
     }
 
     public void setPrice(String price) {
-        Price = price;
+        this.price = price;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 }

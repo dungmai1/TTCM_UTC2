@@ -35,25 +35,43 @@ public class ProductDetailActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         ImageView imageView = binding.imageView;
         // Nhận URL hình ảnh từ Intent
-        String imageURL = getIntent().getStringExtra("imageURL");
-        String productName = getIntent().getStringExtra("productname");
-        String price = getIntent().getStringExtra("price");
+        String ImageURL = getIntent().getStringExtra("ImageURL");
+        String ProductName = getIntent().getStringExtra("ProductName");
+        String Price = getIntent().getStringExtra("Price");
         String description = getIntent().getStringExtra("description");
-        binding.txtProductNameDetail.setText(productName);
-        binding.txtPrice.setText(price+" VNĐ");
+        binding.txtProductNameDetail.setText(ProductName);
+        binding.txtPrice.setText(Price+" VNĐ");
         binding.txtDesciption.setText(description);
+        String Quality =binding.Quality.getText().toString();
         // Sử dụng thư viện Glide để tải và hiển thị hình ảnh từ URL
         Glide.with(this)
-                .load(imageURL)
+                .load(ImageURL)
                 .into(imageView);
         binding.btnAddToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 databaseReference = FirebaseDatabase.getInstance().getReference("Cart");
                 String ID = databaseReference.push().getKey();
-                Cart cart = new Cart(productName,price,imageURL);
+                Cart cart = new Cart(ProductName,Price,ImageURL,Quality);
                 databaseReference.child(ID).setValue(cart);
                 Toast.makeText(ProductDetailActivity.this,"Add to cart success",Toast.LENGTH_LONG).show();
+            }
+        });
+        binding.BtnPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int count = Integer.parseInt(binding.Quality.getText().toString());
+                //Toast.makeText(ProductDetailActivity.this,count,Toast.LENGTH_LONG).show();
+                binding.Quality.setText(String.valueOf(count+1));
+            }
+        });
+        binding.BtnMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int count = Integer.parseInt(binding.Quality.getText().toString());
+                if(count!=1){
+                    binding.Quality.setText(String.valueOf(count-1));
+                }
             }
         });
         //Load dữ liêu sử dụng Serializable

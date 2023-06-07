@@ -46,9 +46,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, ProductDetailActivity.class);
-                intent.putExtra("imageURL",products.get(holder.getAdapterPosition()).getImageProduct());
-                intent.putExtra("productname",products.get(holder.getAdapterPosition()).getProductName());
-                intent.putExtra("price",products.get(holder.getAdapterPosition()).getPrice());
+                intent.putExtra("ImageURL",products.get(holder.getAdapterPosition()).getImageProduct());
+                intent.putExtra("ProductName",products.get(holder.getAdapterPosition()).getProductName());
+                intent.putExtra("Price",products.get(holder.getAdapterPosition()).getPrice());
                 intent.putExtra("description",products.get(holder.getAdapterPosition()).getDescription());
                 //intent.putExtra("all",products.get(position));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

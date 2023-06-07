@@ -1,5 +1,7 @@
 package com.maidanhdung.ecommerce.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,13 +14,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.maidanhdung.ecommerce.R;
+import com.maidanhdung.ecommerce.activities.AddressActivity;
+import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
 import com.maidanhdung.ecommerce.adapters.CartAdapter;
 import com.maidanhdung.ecommerce.adapters.MyAdapter;
 import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
@@ -35,7 +42,6 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class CartFragment extends Fragment {
-    private RecyclerView recyclerView;
     private ArrayList<Cart> carts;
     private CartAdapter cartAdapter;
     private DatabaseReference databaseReference;
@@ -85,31 +91,59 @@ public class CartFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_cart, container, false);
-        View rootView = inflater.inflate(R.layout.fragment_cart, container, false);
-        recyclerView = rootView.findViewById(R.id.recyclerviewCart);
+        binding = FragmentCartBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        //View rootView = inflater.inflate(R.layout.fragment_cart, container, false);
+        binding.recyclerviewCart.setLayoutManager(new LinearLayoutManager(getContext()));
+        FirebaseRecyclerOptions<Cart> options =
+                new FirebaseRecyclerOptions.Builder<Cart>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Cart"), Cart.class)
+                        .build();
+        cartAdapter = new CartAdapter(options);
+        binding.recyclerviewCart.setAdapter(cartAdapter);
         databaseReference = FirebaseDatabase.getInstance().getReference("Cart");
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),1);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        carts = new ArrayList<>();
-        cartAdapter = new CartAdapter(getActivity(),carts);
-        recyclerView.setAdapter(cartAdapter);
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int total =0;
                 for (DataSnapshot dataSnapshot: snapshot.getChildren()){
-                    Cart cart = dataSnapshot.getValue(Cart.class);
-                    carts.add(cart);
+                    String price = dataSnapshot.child("price").getValue(String.class);
+                    total = total + Integer.parseInt(price);
+                    // Gán dữ liệu từ nhánh "details" vào đối tượng Products
                 }
-                cartAdapter.notifyDataSetChanged();
+                binding.total.setText("Total: "+String.valueOf(total)+" VNĐ");
+                //Toast.makeText(getContext(),String.valueOf(total),Toast.LENGTH_LONG).show();
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
-        return  rootView;
+        cartAdapter.notifyDataSetChanged();
+        return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        binding.btnPayment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), AddressActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        cartAdapter.startListening();
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        cartAdapter.stopListening();
+    }
 }
