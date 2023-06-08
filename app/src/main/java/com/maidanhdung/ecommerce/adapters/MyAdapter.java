@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +18,7 @@ import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
 import com.maidanhdung.ecommerce.models.Products;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
@@ -41,7 +43,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 .load(products.get(position).getImageProduct())
                 .into(holder.imageView);
         holder.productname.setText(products.get(position).getProductName());
-        holder.price.setText("Giá: "+products.get(position).getPrice()+" VNĐ");
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String priceFormat = decimalFormat.format(products.get(position).getPrice());
+        holder.price.setText("Giá: "+priceFormat+" VNĐ");
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

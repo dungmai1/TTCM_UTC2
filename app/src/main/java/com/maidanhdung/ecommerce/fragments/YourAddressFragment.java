@@ -1,12 +1,8 @@
 package com.maidanhdung.ecommerce.fragments;
 
-import static android.content.Intent.getIntent;
-
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -14,30 +10,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.Home;
+import com.maidanhdung.ecommerce.adapters.AddressAdapter;
 import com.maidanhdung.ecommerce.adapters.CartAdapter;
+import com.maidanhdung.ecommerce.adapters.MyAdapter;
 import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
+import com.maidanhdung.ecommerce.databinding.FragmentYourAddressBinding;
+import com.maidanhdung.ecommerce.models.Address;
 import com.maidanhdung.ecommerce.models.Cart;
+import com.maidanhdung.ecommerce.models.Products;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link CartFragment#newInstance} factory method to
+ * Use the {@link YourAddressFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CartFragment extends Fragment {
-    private ArrayList<Cart> carts;
-    private CartAdapter cartAdapter;
+public class YourAddressFragment extends Fragment {
+    FragmentYourAddressBinding binding;
+    private ArrayList<Address> addressArrayList;
+    private AddressAdapter addressAdapter;
     private DatabaseReference databaseReference;
-    FragmentCartBinding binding;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -48,7 +48,7 @@ public class CartFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public CartFragment() {
+    public YourAddressFragment() {
         // Required empty public constructor
     }
 
@@ -58,11 +58,11 @@ public class CartFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment CartFragment.
+     * @return A new instance of fragment YourAddressFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CartFragment newInstance(String param1, String param2) {
-        CartFragment fragment = new CartFragment();
+    public static YourAddressFragment newInstance(String param1, String param2) {
+        YourAddressFragment fragment = new YourAddressFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -82,60 +82,40 @@ public class CartFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_cart, container, false);
-        binding = FragmentCartBinding.inflate(inflater, container, false);
+        //return inflater.inflate(R.layout.fragment_your_address, container, false);
+        binding = FragmentYourAddressBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-        //View rootView = inflater.inflate(R.layout.fragment_cart, container, false);
-        binding.recyclerviewCart.setLayoutManager(new LinearLayoutManager(getContext()));
-        FirebaseRecyclerOptions<Cart> options =
-                new FirebaseRecyclerOptions.Builder<Cart>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Cart"), Cart.class)
-                        .build();
-        cartAdapter = new CartAdapter(options);
-        binding.recyclerviewCart.setAdapter(cartAdapter);
-        databaseReference = FirebaseDatabase.getInstance().getReference("Cart");
+        binding.btnAddnewAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AddAdressFragment addAdressFragment = new AddAdressFragment();
+                ((Home) requireActivity()).replaceFragment(addAdressFragment);
+            }
+        });
+        binding.recyclerviewAddress.setLayoutManager(new LinearLayoutManager(getContext()));
+        databaseReference = FirebaseDatabase.getInstance().getReference("Address");
+        addressArrayList = new ArrayList<>();
+        addressAdapter = new AddressAdapter(getActivity(), addressArrayList);
+        binding.recyclerviewAddress.setAdapter(addressAdapter);
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int total = 0;
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    int price = dataSnapshot.child("price").getValue(int.class);
-                    int quality = dataSnapshot.child("quality").getValue(int.class);
-                    total = total + ((price) * quality);
+                    Address address = dataSnapshot.getValue(Address.class);
+                    addressArrayList.add(address);
                 }
-                DecimalFormat decimalFormat = new DecimalFormat("#,###");
-                String totalFormat = decimalFormat.format(total);
-                binding.total.setText("Total: " + totalFormat+ " VNĐ");
-                //Toast.makeText(getContext(),String.valueOf(total),Toast.LENGTH_LONG).show();
-                cartAdapter.notifyDataSetChanged();
+                addressAdapter.notifyDataSetChanged();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
-        binding.btnPayment.setOnClickListener(new View.OnClickListener() {
+        binding.btnContinuePayment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                YourAddressFragment yourAddressFragment = new YourAddressFragment();
-                ((Home) requireActivity()).replaceFragment(yourAddressFragment);
             }
         });
         return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        cartAdapter.startListening();
-    }
-    @Override
-    public void onStop() {
-        super.onStop();
-        cartAdapter.stopListening();
     }
 }

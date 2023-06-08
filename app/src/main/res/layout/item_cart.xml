@@ -49,11 +49,11 @@
                     >
 
                     <ImageView
-                        android:id="@+id/BtnPlus"
+                        android:id="@+id/BtnMinus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/boder"
-                        app:srcCompat="@drawable/baseline_add_24" />
+                        app:srcCompat="@drawable/baseline_horizontal_rule_24" />
                     <TextView
                         android:id="@+id/Quality"
                         android:layout_width="wrap_content"
@@ -64,11 +64,11 @@
                         android:layout_marginRight="12sp"/>
 
                     <ImageView
-                        android:id="@+id/BtnMinus"
+                        android:id="@+id/BtnPlus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/boder"
-                        app:srcCompat="@drawable/baseline_horizontal_rule_24"
+                        app:srcCompat="@drawable/baseline_add_24"
                        />
                 </LinearLayout>
             </LinearLayout>

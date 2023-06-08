@@ -3,18 +3,25 @@ package com.maidanhdung.ecommerce.models;
 import java.io.Serializable;
 
 public class Products implements Serializable {
-    String ProductName, ImageProduct, Price, Description;
+    String ProductName, ImageProduct, Description;
+    int Price;
     public Products() {
     }
 
-    public Products(String productName, String imageProduct, String price, String description ) {
+    public Products(String productName, String imageProduct, String description, int price) {
         ProductName = productName;
         ImageProduct = imageProduct;
-        Price = price;
         Description = description;
+        Price = price;
     }
 
+    public int getPrice() {
+        return Price;
+    }
 
+    public void setPrice(int price) {
+        Price = price;
+    }
 
     public String getDescription() {
         return Description;
@@ -40,11 +47,5 @@ public class Products implements Serializable {
         ImageProduct = imageProduct;
     }
 
-    public String getPrice() {
-        return Price;
-    }
 
-    public void setPrice(String price) {
-        Price = price;
-    }
 }

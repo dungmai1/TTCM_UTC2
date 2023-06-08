@@ -33,6 +33,7 @@ import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.fragments.CartFragment;
 import com.maidanhdung.ecommerce.models.Cart;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,6 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
         super(options);
     }
 
-    int totalAmount = 0;
 
     @NonNull
     @Override
@@ -52,12 +52,62 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull ViewHolder holder, final int position, @NonNull final Cart cart) {
+    protected void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") final int position, @NonNull final Cart cart) {
         Glide.with(holder.imageURL.getContext())
                 .load(cart.getImageURL())
                 .into(holder.imageURL);
         holder.productName.setText(cart.getProductName());
-        holder.price.setText(cart.getPrice()+" VNĐ");
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String PriceFormat = decimalFormat.format(cart.getPrice());
+        holder.price.setText(PriceFormat+" VNĐ");
+        holder.Quality.setText(String.valueOf(cart.getQuality()));
+        holder.BtnPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int count = Integer.parseInt(holder.Quality.getText().toString());
+                //Toast.makeText(ProductDetailActivity.this,count,Toast.LENGTH_LONG).show();
+                holder.Quality.setText(String.valueOf(count+1));
+                FirebaseDatabase.getInstance().getReference()
+                        .child("Cart")
+                        .child(getRef(holder.getAdapterPosition()).getKey())
+                        .child("quality")
+                        .setValue(count + 1)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    // Xử lý khi hoàn tất thành công
+                                } else {
+                                    // Xử lý khi hoàn tất thất bại
+                                }
+                            }
+                        });
+            }
+        });
+        holder.BtnMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int count = Integer.parseInt(holder.Quality.getText().toString());
+                if(count!=1){
+                    holder.Quality.setText(String.valueOf(count-1));
+                    FirebaseDatabase.getInstance().getReference()
+                            .child("Cart")
+                            .child(getRef(holder.getAdapterPosition()).getKey())
+                            .child("quality")
+                            .setValue(count - 1)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        // Xử lý khi hoàn tất thành công
+                                    } else {
+                                        // Xử lý khi hoàn tất thất bại
+                                    }
+                                }
+                            });
+                }
+            }
+        });
         holder.deleteitem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,14 +140,18 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        ImageView imageURL, deleteitem;
-        TextView productName, price;
+        ImageView imageURL, deleteitem, BtnPlus,BtnMinus;
+        TextView productName, price, Quality, Address;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             deleteitem = itemView.findViewById(R.id.deleteitem);
             imageURL = itemView.findViewById(R.id.imageviewCart);
             productName = itemView.findViewById(R.id.txtProductNameCart);
             price = itemView.findViewById(R.id.txtPriceCart);
+            BtnPlus = itemView.findViewById(R.id.BtnPlus);
+            BtnMinus = itemView.findViewById(R.id.BtnMinus);
+            Quality = itemView.findViewById(R.id.Quality);
+            Address = itemView.findViewById(R.id.txtAddressPayment);
         }
     }
 }

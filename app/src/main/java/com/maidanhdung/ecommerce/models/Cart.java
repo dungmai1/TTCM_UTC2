@@ -1,22 +1,15 @@
 package com.maidanhdung.ecommerce.models;
 
 public class Cart {
-    String productName, price, imageURL, Quality;
+    String productName, imageURL;
+    int price, Quality;
 
     public Cart() {}
 
-    public Cart(String productName, String price, String imageURL, String quality) {
+    public Cart(String productName, String imageURL, int price, int quality) {
         this.productName = productName;
-        this.price = price;
         this.imageURL = imageURL;
-        Quality = quality;
-    }
-
-    public String getQuality() {
-        return Quality;
-    }
-
-    public void setQuality(String quality) {
+        this.price = price;
         Quality = quality;
     }
 
@@ -28,19 +21,27 @@ public class Cart {
         this.productName = productName;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
     public String getImageURL() {
         return imageURL;
     }
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getQuality() {
+        return Quality;
+    }
+
+    public void setQuality(int quality) {
+        Quality = quality;
     }
 }
