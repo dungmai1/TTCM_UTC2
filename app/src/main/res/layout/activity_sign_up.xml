@@ -50,7 +50,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.194"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextEmailPhone" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextPhone" />
     <EditText
         android:id="@+id/editTextRePassword"
         android:layout_width="0dp"
@@ -108,7 +108,7 @@
         app:layout_constraintTop_toBottomOf="@+id/editTextLastName" />
 
     <EditText
-        android:id="@+id/editTextEmailPhone"
+        android:id="@+id/editTextPhone"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -117,7 +117,7 @@
         android:background="@drawable/rectangle_1"
         android:ems="10"
         android:gravity="center"
-        android:hint="Email ID/ Phone Number"
+        android:hint="Phone Number"
         android:inputType="textPersonName"
         android:textColor="#FFFF"
         android:textColorHint="#ffff"

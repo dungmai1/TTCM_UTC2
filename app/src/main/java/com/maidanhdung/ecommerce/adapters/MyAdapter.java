@@ -54,6 +54,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 intent.putExtra("ProductName",products.get(holder.getAdapterPosition()).getProductName());
                 intent.putExtra("Price",products.get(holder.getAdapterPosition()).getPrice());
                 intent.putExtra("description",products.get(holder.getAdapterPosition()).getDescription());
+                intent.putExtra("ImageDetail1",products.get(position).getImageDetail1());
+                intent.putExtra("ImageDetail2",products.get(position).getImageDetail2());
+                intent.putExtra("ImageDetail3",products.get(position).getImageDetail3());
+                intent.putExtra("ImageDetail4",products.get(position).getImageDetail4());
                 //intent.putExtra("all",products.get(position));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);

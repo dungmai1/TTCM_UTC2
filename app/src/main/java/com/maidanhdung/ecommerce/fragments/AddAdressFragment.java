@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.maidanhdung.ecommerce.R;
+import com.maidanhdung.ecommerce.activities.SignIn;
 import com.maidanhdung.ecommerce.databinding.FragmentAddAdressBinding;
 import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
 import com.maidanhdung.ecommerce.models.Address;
@@ -73,7 +74,6 @@ public class AddAdressFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_add_adress, container, false);
         binding = FragmentAddAdressBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-
         binding.btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -83,7 +83,7 @@ public class AddAdressFragment extends Fragment {
                 String subdistrict = binding.editTextSubDistrict.getText().toString();
                 String streetaddress = binding.editTextAddress.getText().toString();
                 int phone = Integer.parseInt(binding.editTextPhone.getText().toString());
-                databaseReference = FirebaseDatabase.getInstance().getReference("Address");
+                databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(SignIn.txtPhone);
                 String ID = databaseReference.push().getKey();
                 Address address = new Address(name,province,subdistrict,district,streetaddress,phone);
                 databaseReference.child(ID).setValue(address);

@@ -30,7 +30,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.maidanhdung.ecommerce.R;
+import com.maidanhdung.ecommerce.activities.SignIn;
+import com.maidanhdung.ecommerce.databinding.FragmentYourAddressBinding;
 import com.maidanhdung.ecommerce.fragments.CartFragment;
+import com.maidanhdung.ecommerce.models.Address;
 import com.maidanhdung.ecommerce.models.Cart;
 
 import java.text.DecimalFormat;
@@ -38,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHolder> {
+
 
     public CartAdapter(@NonNull FirebaseRecyclerOptions<Cart> options) {
         super(options);
@@ -69,6 +73,7 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
                 holder.Quality.setText(String.valueOf(count+1));
                 FirebaseDatabase.getInstance().getReference()
                         .child("Cart")
+                        .child(SignIn.txtPhone)
                         .child(getRef(holder.getAdapterPosition()).getKey())
                         .child("quality")
                         .setValue(count + 1)
@@ -92,6 +97,7 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
                     holder.Quality.setText(String.valueOf(count-1));
                     FirebaseDatabase.getInstance().getReference()
                             .child("Cart")
+                            .child(SignIn.txtPhone)
                             .child(getRef(holder.getAdapterPosition()).getKey())
                             .child("quality")
                             .setValue(count - 1)
@@ -118,6 +124,7 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
                             public void onClick(DialogInterface dialog, int id) {
                                 FirebaseDatabase.getInstance().getReference()
                                         .child("Cart")
+                                        .child(SignIn.txtPhone)
                                         .child(getRef(holder.getAdapterPosition()).getKey())
                                         .removeValue()
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -138,10 +145,9 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
             }
         });
     }
-
     public class ViewHolder extends RecyclerView.ViewHolder{
         ImageView imageURL, deleteitem, BtnPlus,BtnMinus;
-        TextView productName, price, Quality, Address;
+        TextView productName, price, Quality;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             deleteitem = itemView.findViewById(R.id.deleteitem);
@@ -151,7 +157,6 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
             BtnPlus = itemView.findViewById(R.id.BtnPlus);
             BtnMinus = itemView.findViewById(R.id.BtnMinus);
             Quality = itemView.findViewById(R.id.Quality);
-            Address = itemView.findViewById(R.id.txtAddressPayment);
         }
     }
 }

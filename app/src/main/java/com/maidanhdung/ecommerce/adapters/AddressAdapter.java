@@ -6,6 +6,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -19,13 +20,17 @@ import com.maidanhdung.ecommerce.models.Address;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHolder> {
     private Context context;
     private ArrayList<Address> addressArrayList;
-    int defaultSelectedPosition = 0;
+    int SelectedPosition = -1;
+    private String selectedAddress;
+    private boolean[] checkedPositions;
 
-
+    public AddressAdapter(){
+    }
     public AddressAdapter(Context context, ArrayList<Address> addressArrayList) {
         this.context = context;
         this.addressArrayList = addressArrayList;
@@ -44,15 +49,12 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
                 addressArrayList.get(position).getSubDistrict() + "," +
                 addressArrayList.get(position).getProvince() + "," +
                 addressArrayList.get(position).getStreetAddress());
-        if (position == defaultSelectedPosition) {
-            holder.radioButton.setChecked(true);
-        } else {
-            holder.radioButton.setChecked(false);
-        }
+        holder.radioButton.setChecked(position == SelectedPosition);
         holder.radioButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                defaultSelectedPosition = holder.getAdapterPosition();
+                SelectedPosition = holder.getAdapterPosition();
+                selectedAddress = holder.txtAddress.getText().toString();
                 notifyDataSetChanged();
             }
         });
@@ -61,7 +63,9 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
     public int getItemCount() {
         return addressArrayList.size();
     }
-
+    public String getSelectedItems() {
+        return selectedAddress;
+    }
     public class ViewHolder extends RecyclerView.ViewHolder{
         RadioButton radioButton;
         TextView txtAddress;

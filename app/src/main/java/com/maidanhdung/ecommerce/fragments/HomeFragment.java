@@ -88,12 +88,11 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_home, container, false);
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-
+        
         recyclerView = rootView.findViewById(R.id.recyclerview);
         databaseReference = FirebaseDatabase.getInstance().getReference("food");
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(gridLayoutManager);
         imageproducts = new ArrayList<>();
         myAdapter = new MyAdapter(getActivity(), imageproducts);
@@ -105,9 +104,17 @@ public class HomeFragment extends Fragment {
                 for (DataSnapshot dataSnapshot: snapshot.getChildren()){
                     Products products = dataSnapshot.getValue(Products.class);
                     DataSnapshot detailsSnapshot = dataSnapshot.child("ProductDetail");
-                    String description = detailsSnapshot.child("Description").getValue(String.class);
+                    String ImageDetail1 = detailsSnapshot.child("ImageDetail1").getValue(String.class);
+                    String ImageDetail2 = detailsSnapshot.child("ImageDetail2").getValue(String.class);
+                    String ImageDetail3 = detailsSnapshot.child("ImageDetail3").getValue(String.class);
+                    String ImageDetail4 = detailsSnapshot.child("ImageDetail4").getValue(String.class);
                     // Gán dữ liệu từ nhánh "details" vào đối tượng Products
+                    String description = detailsSnapshot.child("Description").getValue(String.class);
                     products.setDescription(description);
+                    products.setImageDetail1(ImageDetail1);
+                    products.setImageDetail2(ImageDetail2);
+                    products.setImageDetail3(ImageDetail3);
+                    products.setImageDetail4(ImageDetail4);
                     imageproducts.add(products);
                 }
                 myAdapter.notifyDataSetChanged();
