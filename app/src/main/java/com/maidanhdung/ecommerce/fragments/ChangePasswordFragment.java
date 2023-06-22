@@ -29,6 +29,8 @@ public class ChangePasswordFragment extends Fragment {
     FragmentChangePasswordBinding binding;
     DatabaseReference databaseReference;
     private  static String password;
+    private  static String phone;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -77,43 +79,48 @@ public class ChangePasswordFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_change_password, container, false);
         binding = FragmentChangePasswordBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-        String phone = SignIn.txtPhone;
+        phone = SignIn.txtPhone;
+        EventClickSavePassword();
+        return view;
+    }
+    private void EventClickSavePassword() {
         binding.btnSavePass.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String currentpass = binding.edtCurrentPass.getText().toString();
                 String newpass = binding.edtNewPass.getText().toString();
                 String repass = binding.edtRePass.getText().toString();
-                    databaseReference = FirebaseDatabase.getInstance().getReference("Users");
-                    databaseReference.orderByChild("phoneNumber").equalTo(Integer.parseInt(phone)).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                String clubkey = null;
-                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                    clubkey = dataSnapshot.getKey();
-                                    String pass = snapshot.child(clubkey).child("password").getValue(String.class);
-                                    if(!currentpass.equals(pass)){
-                                        Toast.makeText(getContext(), "Current Password Fail", Toast.LENGTH_LONG).show();
-                                    }
-                                    else if(!newpass.equals(repass)){
-                                        Toast.makeText(getContext(), "Password do not match", Toast.LENGTH_LONG).show();
-                                    }
-                                    else{
-                                        databaseReference.child(clubkey).child("password").setValue(newpass);
-                                        Toast.makeText(getContext(), "Change Success", Toast.LENGTH_LONG).show();
-                                        getFragmentManager().popBackStack();
-                                    }
+                databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+                databaseReference.orderByChild("phoneNumber").equalTo(Integer.parseInt(phone)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            String clubkey = null;
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                clubkey = dataSnapshot.getKey();
+                                String pass = snapshot.child(clubkey).child("password").getValue(String.class);
+                                if(currentpass.isEmpty()||newpass.isEmpty()||repass.isEmpty()){
+                                    Toast.makeText(getContext(), "Pleas enter all fields", Toast.LENGTH_SHORT).show();
+                                }
+                                else if(!currentpass.equals(pass)){
+                                    Toast.makeText(getContext(), "Current Password Fail", Toast.LENGTH_SHORT).show();
+                                }
+                                else if(!newpass.equals(repass)){
+                                    Toast.makeText(getContext(), "Password do not match", Toast.LENGTH_SHORT).show();
+                                }
+                                else{
+                                    databaseReference.child(clubkey).child("password").setValue(newpass);
+                                    Toast.makeText(getContext(), "Change Success", Toast.LENGTH_LONG).show();
+                                    getFragmentManager().popBackStack();
                                 }
                             }
                         }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                        }
-                    });
-                }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
+            }
         });
-
-        return view;
     }
 }

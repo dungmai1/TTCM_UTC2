@@ -20,6 +20,7 @@ public class SignIn extends AppCompatActivity {
     DatabaseReference databaseReference;
     public static String txtPhone;
     public static String txtPassword;
+    public static int phone;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +47,7 @@ public class SignIn extends AppCompatActivity {
                                 String clubkey = null;
                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                     clubkey = dataSnapshot.getKey();
-                                    int phone = snapshot.child(clubkey).child("phoneNumber").getValue(int.class);
+                                    phone = snapshot.child(clubkey).child("phoneNumber").getValue(int.class);
                                     String password = snapshot.child(clubkey).child("password").getValue(String.class);
                                 if(Integer.parseInt(txtPhone) != phone||!password.equals(txtPassword)){
                                     Toast.makeText(SignIn.this, "Wrong Password or Phone Number", Toast.LENGTH_SHORT).show();
@@ -54,6 +55,7 @@ public class SignIn extends AppCompatActivity {
                                     Toast.makeText(SignIn.this, "Login Success", Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(SignIn.this, Home.class);
                                     startActivity(intent);
+                                    finishAffinity();
                                 }
                             }
                             }
@@ -73,6 +75,7 @@ public class SignIn extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(SignIn.this, SignUp.class);
                 startActivity(intent);
+                finishAffinity();
             }
         });
     }

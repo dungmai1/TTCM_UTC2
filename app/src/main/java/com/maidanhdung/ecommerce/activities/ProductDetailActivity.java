@@ -38,6 +38,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         binding = ActivityProductDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         // Nhận URL hình ảnh từ Intent
+        loaddata();
+        EventClickBtnPlus();
+        EventClickBtnMinus();
+    }
+    private void loaddata() {
         String ImageURL = getIntent().getStringExtra("ImageURL");
         String ProductName = getIntent().getStringExtra("ProductName");
         int Price = getIntent().getIntExtra("Price", 0);
@@ -70,8 +75,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         binding.btnAddToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                databaseReference = FirebaseDatabase.getInstance().getReference("Cart");
-                String ID = SignIn.txtPhone;
+                String ID = String.valueOf(SignIn.phone);
+                databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(ID);
                 String Key = databaseReference.push().getKey();
                 int Quality = Integer.parseInt(binding.Quality.getText().toString());
                 Cart cart = new Cart(ProductName, ImageURL, Price, Quality);
@@ -92,7 +97,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                             Toast.makeText(ProductDetailActivity.this, "Add to cart success", Toast.LENGTH_SHORT).show();
                         } else {
                             // Sản phẩm chưa tồn tại trong Firebase, thêm vào giỏ hàng
-                            databaseReference.child(ID).child(Key).setValue(cart);
+                            databaseReference.child(Key).setValue(cart);
                             Toast.makeText(ProductDetailActivity.this, "Add to cart success", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -104,14 +109,9 @@ public class ProductDetailActivity extends AppCompatActivity {
                 });
             }
         });
-        binding.BtnPlus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int count = Integer.parseInt(binding.Quality.getText().toString());
-                //Toast.makeText(ProductDetailActivity.this,count,Toast.LENGTH_LONG).show();
-                binding.Quality.setText(String.valueOf(count+1));
-            }
-        });
+    }
+
+    private void EventClickBtnMinus() {
         binding.BtnMinus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,6 +119,17 @@ public class ProductDetailActivity extends AppCompatActivity {
                 if(count!=1){
                     binding.Quality.setText(String.valueOf(count-1));
                 }
+            }
+        });
+    }
+
+    private void EventClickBtnPlus() {
+        binding.BtnPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int count = Integer.parseInt(binding.Quality.getText().toString());
+                //Toast.makeText(ProductDetailActivity.this,count,Toast.LENGTH_LONG).show();
+                binding.Quality.setText(String.valueOf(count+1));
             }
         });
     }

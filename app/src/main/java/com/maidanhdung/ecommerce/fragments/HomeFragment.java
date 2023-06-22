@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -27,10 +28,13 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.maidanhdung.ecommerce.adapters.MyAdapter;
 import com.maidanhdung.ecommerce.R;
+import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
+import com.maidanhdung.ecommerce.databinding.FragmentHomeBinding;
 import com.maidanhdung.ecommerce.models.Products;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ObjIntConsumer;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,10 +42,10 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
-    private RecyclerView recyclerView;
     private ArrayList<Products> imageproducts;
     private MyAdapter myAdapter;
     private DatabaseReference databaseReference;
+    FragmentHomeBinding binding;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -73,7 +77,6 @@ public class HomeFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,20 +90,39 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_home, container, false);
-        View rootView = inflater.inflate(R.layout.fragment_home, container, false);
-        
-        recyclerView = rootView.findViewById(R.id.recyclerview);
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        //View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        View view = binding.getRoot();
+        loaddata();
+        searchProducts();
+        return view;
+    }
+    private void searchProducts() {
+        binding.IDSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                String searchText = binding.IDSearchView.getQuery().toString();
+                filterList(searchText);
+                return true;
+            }
+        });
+    }
+    private void loaddata() {
         databaseReference = FirebaseDatabase.getInstance().getReference("food");
-        recyclerView.setHasFixedSize(true);
+        binding.recyclerview.setHasFixedSize(true);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
-        recyclerView.setLayoutManager(gridLayoutManager);
+        binding.recyclerview.setLayoutManager(gridLayoutManager);
         imageproducts = new ArrayList<>();
         myAdapter = new MyAdapter(getActivity(), imageproducts);
-        recyclerView.setAdapter(myAdapter);
-
+        binding.recyclerview.setAdapter(myAdapter);
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                imageproducts.clear();
                 for (DataSnapshot dataSnapshot: snapshot.getChildren()){
                     Products products = dataSnapshot.getValue(Products.class);
                     DataSnapshot detailsSnapshot = dataSnapshot.child("ProductDetail");
@@ -121,9 +143,19 @@ public class HomeFragment extends Fragment {
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
-        return rootView;
+    }
+
+    private void filterList(String searchText){
+        ArrayList<Products> filteredList = new ArrayList<>();
+
+        for (Products product : imageproducts) {
+            // Kiểm tra nếu tên sản phẩm hoặc bất kỳ thuộc tính khác nào bạn muốn tìm kiếm chứa searchText
+            if (product.getProductName().toLowerCase().contains(searchText.toLowerCase())) {
+                filteredList.add(product);
+            }
+        }
+        myAdapter.filterList(filteredList);
     }
 }

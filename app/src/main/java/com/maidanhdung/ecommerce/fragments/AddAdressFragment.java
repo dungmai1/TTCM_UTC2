@@ -83,7 +83,7 @@ public class AddAdressFragment extends Fragment {
                 String subdistrict = binding.editTextSubDistrict.getText().toString();
                 String streetaddress = binding.editTextAddress.getText().toString();
                 int phone = Integer.parseInt(binding.editTextPhone.getText().toString());
-                databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(SignIn.txtPhone);
+                databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
                 String ID = databaseReference.push().getKey();
                 Address address = new Address(name,province,subdistrict,district,streetaddress,phone);
                 databaseReference.child(ID).setValue(address);

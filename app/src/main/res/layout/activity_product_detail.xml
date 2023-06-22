@@ -146,6 +146,7 @@
                                         android:backgroundTint="@color/background"
                                         android:textColor="#fff"
                                         android:layout_gravity="center"
+                                        android:layout_marginBottom="32dp"
                                         />
                 </LinearLayout>
         </LinearLayout>

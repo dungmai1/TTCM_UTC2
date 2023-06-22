@@ -1,6 +1,7 @@
 package com.maidanhdung.ecommerce.fragments;
 
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,8 +91,26 @@ public class CartFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_cart, container, false);
         binding = FragmentCartBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-        //View rootView = inflater.inflate(R.layout.fragment_cart, container, false);
-        String phone = SignIn.txtPhone;
+        loadCart();
+        EventClickPayment();
+        return view;
+    }
+    private void EventClickPayment() {
+        binding.btnPayment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(cartAdapter.getItemCount() == 0){
+                    Toast.makeText(getContext(),"Cart null",Toast.LENGTH_LONG).show();
+                    //showDialog();
+                }else{
+                    PaymentFragment paymentFragment = new PaymentFragment();
+                    ((Home) requireActivity()).replaceFragment(paymentFragment);
+                }
+            }
+        });
+    }
+    private void loadCart() {
+        String phone = String.valueOf(SignIn.phone);
         binding.recyclerviewCart.setLayoutManager(new LinearLayoutManager(getContext()));
         FirebaseRecyclerOptions<Cart> options =
                 new FirebaseRecyclerOptions.Builder<Cart>()
@@ -118,20 +138,29 @@ public class CartFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-        binding.btnPayment.setOnClickListener(new View.OnClickListener() {
+
+    }
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage("No products");
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        // Delay 2 giây
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
             @Override
-            public void onClick(View view) {
-                    PaymentFragment paymentFragment = new PaymentFragment();
-                    ((Home) requireActivity()).replaceFragment(paymentFragment);
+            public void run() {
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.dismiss();
+                }
             }
-        });
-        return view;
+        };
+        handler.postDelayed(runnable, 2000);
     }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
-
     @Override
     public void onStart() {
         super.onStart();

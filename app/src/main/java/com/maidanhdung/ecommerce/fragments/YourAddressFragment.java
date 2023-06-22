@@ -90,15 +90,38 @@ public class YourAddressFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_your_address, container, false);
         binding = FragmentYourAddressBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
-        binding.btnAddnewAddress.setOnClickListener(new View.OnClickListener() {
+        EventClickAddnewAddress();
+        loaddata();
+        EventClickSave();
+
+        return view;
+    }
+
+    private void EventClickSave() {
+        binding.btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AddAdressFragment addAdressFragment = new AddAdressFragment();
-                ((Home) requireActivity()).replaceFragment(addAdressFragment);
+                if(addressAdapter.getItemCount() == 0){
+                    Toast.makeText(getContext(),"No Address Yet",Toast.LENGTH_SHORT).show();
+                }
+                else if(addressAdapter.getSelectedItems() == null){
+                    Toast.makeText(getContext(),"Choose the delivery address",Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    sendataAddress();
+                }
             }
         });
+    }
+    private void sendataAddress(){
+        Bundle bundle = new Bundle();
+        bundle.putString("address", addressAdapter.getSelectedItems());
+        getParentFragmentManager().setFragmentResult("data",bundle);
+        getFragmentManager().popBackStack();
+    }
+    private void loaddata() {
         binding.recyclerviewAddress.setLayoutManager(new LinearLayoutManager(getContext()));
-        databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(SignIn.txtPhone);
+        databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
         addressArrayList = new ArrayList<>();
         addressAdapter = new AddressAdapter(getActivity(), addressArrayList);
         binding.recyclerviewAddress.setAdapter(addressAdapter);
@@ -115,18 +138,15 @@ public class YourAddressFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-        binding.btnSave.setOnClickListener(new View.OnClickListener() {
+    }
+
+    private void EventClickAddnewAddress() {
+        binding.btnAddnewAddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(getActivity(),CartFragment.class);
-//                intent.putExtra("data",addressAdapter.getSelectedItems());
-//                getActivity().startActivity(intent);
-                Bundle bundle = new Bundle();
-                bundle.putString("address", addressAdapter.getSelectedItems());
-                getParentFragmentManager().setFragmentResult("data",bundle);
-                getFragmentManager().popBackStack();
+                AddAdressFragment addAdressFragment = new AddAdressFragment();
+                ((Home) requireActivity()).replaceFragment(addAdressFragment);
             }
         });
-        return view;
     }
 }

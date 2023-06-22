@@ -124,7 +124,7 @@ public class CartAdapter extends FirebaseRecyclerAdapter<Cart,CartAdapter.ViewHo
                             public void onClick(DialogInterface dialog, int id) {
                                 FirebaseDatabase.getInstance().getReference()
                                         .child("Cart")
-                                        .child(SignIn.txtPhone)
+                                        .child(String.valueOf(SignIn.phone))
                                         .child(getRef(holder.getAdapterPosition()).getKey())
                                         .removeValue()
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {

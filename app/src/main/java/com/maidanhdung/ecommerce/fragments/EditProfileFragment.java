@@ -20,6 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.Home;
 import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
+import com.maidanhdung.ecommerce.activities.SignUp;
 import com.maidanhdung.ecommerce.databinding.FragmentEditProfileBinding;
 import com.maidanhdung.ecommerce.databinding.FragmentProfileBinding;
 
@@ -72,7 +73,6 @@ public class EditProfileFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -80,6 +80,47 @@ public class EditProfileFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_edit_profile, container, false);
         binding = FragmentEditProfileBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
+        getdataFragmentEditProfile();
+        EventClickSaveProfile();
+        return view;
+    }
+    private void EventClickSaveProfile() {
+        binding.btnSaveProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String firstname = binding.edtFirstName.getText().toString();
+                String lastname = binding.edtLastName.getText().toString();
+                if (firstname.isEmpty()||lastname.isEmpty()) {
+                    Toast.makeText(getContext(),"Pleas enter all fields",Toast.LENGTH_SHORT).show();
+                }else if((!firstname.matches("[a-zA-Z]+"))||(!lastname.matches("[a-zA-Z]+"))){
+                    Toast.makeText(getContext(), "Invalid first or last name", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+                    databaseReference.orderByChild("phoneNumber").equalTo(Integer.parseInt(phone)).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                String clubkey = null;
+                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    clubkey = dataSnapshot.getKey();
+                                }
+                                databaseReference.child(clubkey).child("firstName").setValue(firstname);
+                                databaseReference.child(clubkey).child("lastName").setValue(lastname);
+                            }
+                            Toast.makeText(getContext(), "Change Success", Toast.LENGTH_LONG).show();
+                            getFragmentManager().popBackStack();
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void getdataFragmentEditProfile() {
         getParentFragmentManager().setFragmentResultListener("name", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
@@ -90,34 +131,5 @@ public class EditProfileFragment extends Fragment {
                 binding.edtFirstName.setText(firstname);
             }
         });
-        binding.btnSaveProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                databaseReference = FirebaseDatabase.getInstance().getReference("Users");
-                databaseReference.orderByChild("phoneNumber").equalTo(Integer.parseInt(phone)).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            String firstname = null;
-                            String lastname = null;
-                            String clubkey = null;
-                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                clubkey = dataSnapshot.getKey();
-                                 firstname = binding.edtFirstName.getText().toString();
-                                 lastname = binding.edtLastName.getText().toString();
-                            }
-                            databaseReference.child(clubkey).child("firstName").setValue(firstname);
-                            databaseReference.child(clubkey).child("lastName").setValue(lastname);
-                        }
-                        Toast.makeText(getContext(), "Change Success", Toast.LENGTH_LONG).show();
-                        getFragmentManager().popBackStack();
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                    }
-                });
-            }
-        });
-        return view;
     }
 }

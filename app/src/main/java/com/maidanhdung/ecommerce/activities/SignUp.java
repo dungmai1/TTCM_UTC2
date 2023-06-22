@@ -20,7 +20,6 @@ import com.maidanhdung.ecommerce.models.Users;
 
 public class SignUp extends AppCompatActivity {
     DatabaseReference databaseReference;
-
     ActivitySignUpBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +27,7 @@ public class SignUp extends AppCompatActivity {
         //setContentView(R.layout.activity_sign_in);
         binding = ActivitySignUpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        EventClickSignup();
+        EventClickSignin();
         EventClickCreate();
     }
     private void EventClickCreate() {
@@ -54,7 +53,6 @@ public class SignUp extends AppCompatActivity {
                     databaseReference.orderByChild("phoneNumber").equalTo(Integer.parseInt(txtPhone)).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                             if (dataSnapshot.exists()) {
                                 Toast.makeText(SignUp.this, "Phone Number exists", Toast.LENGTH_SHORT).show();
                             } else {
@@ -73,12 +71,13 @@ public class SignUp extends AppCompatActivity {
             }
         });
     }
-    private void EventClickSignup() {
+    private void EventClickSignin() {
         binding.txtSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(SignUp.this, SignIn.class);
                 startActivity(intent);
+                finishAffinity();
             }
         });
     }

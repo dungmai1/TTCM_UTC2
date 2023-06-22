@@ -1,6 +1,7 @@
 package com.maidanhdung.ecommerce.fragments;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -83,7 +84,16 @@ public class ProfileFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_profile, container, false);
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
+        loaddata();
+        EventClickEditProfile();
+        EventClickChangethePassword();
+        EventClickLogout();
+
+        return view;
+    }
+    private void loaddata() {
         String phone = SignIn.txtPhone;
+        binding.imgProfile.setImageDrawable(getResources().getDrawable(R.drawable.person));
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
         databaseReference.orderByChild("phoneNumber").equalTo(Integer.parseInt(phone)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -92,8 +102,8 @@ public class ProfileFragment extends Fragment {
                     String clubkey = null;
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         clubkey = dataSnapshot.getKey();
-                         firstname = snapshot.child(clubkey).child("firstName").getValue(String.class);
-                         lastname = snapshot.child(clubkey).child("lastName").getValue(String.class);
+                        firstname = snapshot.child(clubkey).child("firstName").getValue(String.class);
+                        lastname = snapshot.child(clubkey).child("lastName").getValue(String.class);
                         PhoneNumber = snapshot.child(clubkey).child("phoneNumber").getValue(int.class);
                         binding.txtPhoneProfile.setText("0"+String.valueOf(PhoneNumber));
                         Bundle bundle = new Bundle();
@@ -109,13 +119,18 @@ public class ProfileFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-        binding.editProfile.setOnClickListener(new View.OnClickListener() {
+    }
+    private void EventClickLogout() {
+        binding.Logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EditProfileFragment editProfileFragment = new EditProfileFragment();
-                ((Home) requireActivity()).replaceFragment(editProfileFragment);
+                Intent intent = new Intent(getActivity(), SignIn.class);
+                startActivity(intent);
+                getActivity().finish();
             }
         });
+    }
+    private void EventClickChangethePassword() {
         binding.ChangeThePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,13 +138,14 @@ public class ProfileFragment extends Fragment {
                 ((Home) requireActivity()).replaceFragment(changePasswordFragment);
             }
         });
-        binding.Logout.setOnClickListener(new View.OnClickListener() {
+    }
+    private void EventClickEditProfile() {
+        binding.editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), SignIn.class);
-                startActivity(intent);
+                EditProfileFragment editProfileFragment = new EditProfileFragment();
+                ((Home) requireActivity()).replaceFragment(editProfileFragment);
             }
         });
-        return view;
     }
 }
