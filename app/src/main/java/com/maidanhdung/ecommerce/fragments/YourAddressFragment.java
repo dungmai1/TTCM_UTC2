@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
@@ -33,12 +35,14 @@ import com.maidanhdung.ecommerce.models.Products;
 
 import java.util.ArrayList;
 
+import javax.security.auth.callback.Callback;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link YourAddressFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class YourAddressFragment extends Fragment {
+public class YourAddressFragment extends Fragment implements AddressAdapter.IAddressRecyclerview {
     FragmentYourAddressBinding binding;
     private ArrayList<Address> addressArrayList;
     private AddressAdapter addressAdapter;
@@ -93,7 +97,6 @@ public class YourAddressFragment extends Fragment {
         EventClickAddnewAddress();
         loaddata();
         EventClickSave();
-
         return view;
     }
 
@@ -113,7 +116,7 @@ public class YourAddressFragment extends Fragment {
             }
         });
     }
-    private void sendataAddress(){
+    public void sendataAddress(){
         Bundle bundle = new Bundle();
         bundle.putString("address", addressAdapter.getSelectedItems());
         getParentFragmentManager().setFragmentResult("data",bundle);
@@ -123,7 +126,7 @@ public class YourAddressFragment extends Fragment {
         binding.recyclerviewAddress.setLayoutManager(new LinearLayoutManager(getContext()));
         databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
         addressArrayList = new ArrayList<>();
-        addressAdapter = new AddressAdapter(getActivity(), addressArrayList);
+        addressAdapter = new AddressAdapter(getActivity(), addressArrayList,this);
         binding.recyclerviewAddress.setAdapter(addressAdapter);
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -149,4 +152,11 @@ public class YourAddressFragment extends Fragment {
             }
         });
     }
+    @Override
+    public void gotoEditAddress() {
+        AppCompatActivity activity = (AppCompatActivity) getContext();
+        EditAddressFragment myFragment = new EditAddressFragment();
+        activity.getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, myFragment).addToBackStack(null).commit();
+    }
+
 }

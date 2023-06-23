@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragments.YourAddressFragment">
+    tools:context=".fragments.YourAddressFragment"
+    android:id="@+id/fragment_yourAddress">
     <Button
         android:id="@+id/btnAddnewAddress"
         android:layout_width="match_parent"
@@ -18,7 +19,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerviewAddress"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             tools:listitem="@layout/item_address" />
     </ScrollView>
     <Button

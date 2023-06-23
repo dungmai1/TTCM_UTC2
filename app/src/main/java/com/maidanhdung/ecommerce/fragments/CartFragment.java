@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,8 +101,8 @@ public class CartFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(cartAdapter.getItemCount() == 0){
-                    Toast.makeText(getContext(),"Cart null",Toast.LENGTH_LONG).show();
-                    //showDialog();
+                    //Toast.makeText(getContext(),"Cart null",Toast.LENGTH_LONG).show();
+                    showDialog();
                 }else{
                     PaymentFragment paymentFragment = new PaymentFragment();
                     ((Home) requireActivity()).replaceFragment(paymentFragment);
