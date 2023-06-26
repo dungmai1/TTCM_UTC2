@@ -1,21 +1,18 @@
 package com.maidanhdung.ecommerce.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioButton;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,17 +22,10 @@ import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.Home;
 import com.maidanhdung.ecommerce.activities.SignIn;
 import com.maidanhdung.ecommerce.adapters.AddressAdapter;
-import com.maidanhdung.ecommerce.adapters.CartAdapter;
-import com.maidanhdung.ecommerce.adapters.MyAdapter;
-import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
 import com.maidanhdung.ecommerce.databinding.FragmentYourAddressBinding;
 import com.maidanhdung.ecommerce.models.Address;
-import com.maidanhdung.ecommerce.models.Cart;
-import com.maidanhdung.ecommerce.models.Products;
 
 import java.util.ArrayList;
-
-import javax.security.auth.callback.Callback;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -124,23 +114,31 @@ public class YourAddressFragment extends Fragment implements AddressAdapter.IAdd
     }
     private void loaddata() {
         binding.recyclerviewAddress.setLayoutManager(new LinearLayoutManager(getContext()));
-        databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
-        addressArrayList = new ArrayList<>();
-        addressAdapter = new AddressAdapter(getActivity(), addressArrayList,this);
+        FirebaseRecyclerOptions<Address> options =
+                new FirebaseRecyclerOptions.Builder<Address>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Address").child(String.valueOf(SignIn.phone)), Address.class)
+                        .build();
+        addressAdapter = new AddressAdapter(options,addressArrayList,this);
         binding.recyclerviewAddress.setAdapter(addressAdapter);
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Address address = dataSnapshot.getValue(Address.class);
-                    addressArrayList.add(address);
-                }
-                addressAdapter.notifyDataSetChanged();
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
+
+//        binding.recyclerviewAddress.setLayoutManager(new LinearLayoutManager(getContext()));
+//        databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
+//        addressArrayList = new ArrayList<>();
+//        addressAdapter = new AddressAdapter(getActivity(), addressArrayList,this);
+//        binding.recyclerviewAddress.setAdapter(addressAdapter);
+//        databaseReference.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+//                    Address address = dataSnapshot.getValue(Address.class);
+//                    addressArrayList.add(address);
+//                }
+//                addressAdapter.notifyDataSetChanged();
+//            }
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//            }
+//        });
     }
 
     private void EventClickAddnewAddress() {
@@ -158,5 +156,14 @@ public class YourAddressFragment extends Fragment implements AddressAdapter.IAdd
         EditAddressFragment myFragment = new EditAddressFragment();
         activity.getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, myFragment).addToBackStack(null).commit();
     }
-
+    @Override
+    public void onStart() {
+        super.onStart();
+        addressAdapter.startListening();
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        addressAdapter.stopListening();
+    }
 }

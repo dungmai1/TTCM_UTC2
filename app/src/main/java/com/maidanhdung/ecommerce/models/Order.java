@@ -1,35 +1,48 @@
 package com.maidanhdung.ecommerce.models;
 
 public class Order {
-    String Product, Status, OrderPlace, Address, ImageProduct;
-    int Price,Quality;
+    String Product, Status, OrderPlace, Address, ImageProduct, PaymentMethod, DeliveryAddress;
+    int Price,Quality,Total,NumberProduct;
     public Order() {
     }
-    public Order(String product, String status, String orderPlace, String address, String imageProduct, int price, int quality) {
+
+    public Order(String product, String status, String orderPlace, String address, String imageProduct, String paymentMethod, String deliveryAddress, int price, int quality, int total, int numberProduct) {
         Product = product;
         Status = status;
         OrderPlace = orderPlace;
         Address = address;
         ImageProduct = imageProduct;
+        PaymentMethod = paymentMethod;
+        DeliveryAddress = deliveryAddress;
         Price = price;
         Quality = quality;
-    }
-    public String getImageProduct() {
-        return ImageProduct;
-    }
-
-    public void setImageProduct(String imageProduct) {
-        ImageProduct = imageProduct;
+        Total = total;
+        NumberProduct = numberProduct;
     }
 
-    public int getQuality() {
-        return Quality;
+    public String getDeliveryAddress() {
+        return DeliveryAddress;
     }
 
-    public void setQuality(int quality) {
-        Quality = quality;
+    public void setDeliveryAddress(String deliveryAddress) {
+        DeliveryAddress = deliveryAddress;
     }
 
+    public int getTotal() {
+        return Total;
+    }
+
+    public void setTotal(int total) {
+        Total = total;
+    }
+
+    public int getNumberProduct() {
+        return NumberProduct;
+    }
+
+    public void setNumberProduct(int numberProduct) {
+        NumberProduct = numberProduct;
+    }
     public String getProduct() {
         return Product;
     }
@@ -62,6 +75,22 @@ public class Order {
         Address = address;
     }
 
+    public String getImageProduct() {
+        return ImageProduct;
+    }
+
+    public void setImageProduct(String imageProduct) {
+        ImageProduct = imageProduct;
+    }
+
+    public String getPaymentMethod() {
+        return PaymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        PaymentMethod = paymentMethod;
+    }
+
     public int getPrice() {
         return Price;
     }
@@ -69,4 +98,13 @@ public class Order {
     public void setPrice(int price) {
         Price = price;
     }
+
+    public int getQuality() {
+        return Quality;
+    }
+
+    public void setQuality(int quality) {
+        Quality = quality;
+    }
+
 }

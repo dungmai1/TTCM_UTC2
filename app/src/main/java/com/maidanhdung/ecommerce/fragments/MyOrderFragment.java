@@ -2,6 +2,7 @@ package com.maidanhdung.ecommerce.fragments;
 
 import static java.sql.DriverManager.println;
 
+import android.app.AlertDialog;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -12,9 +13,12 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -29,12 +33,17 @@ import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
 import com.maidanhdung.ecommerce.activities.SignIn;
 import com.maidanhdung.ecommerce.adapters.CartAdapter;
 import com.maidanhdung.ecommerce.adapters.MyAdapter;
+import com.maidanhdung.ecommerce.adapters.MyListOrderAdapter;
 import com.maidanhdung.ecommerce.adapters.MyOrderAdapter;
 import com.maidanhdung.ecommerce.databinding.FragmentHomeBinding;
 import com.maidanhdung.ecommerce.databinding.FragmentMyOrderBinding;
 import com.maidanhdung.ecommerce.models.Cart;
 import com.maidanhdung.ecommerce.models.Order;
 import com.maidanhdung.ecommerce.models.Products;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,7 +53,13 @@ import com.maidanhdung.ecommerce.models.Products;
 public class MyOrderFragment extends Fragment {
     FragmentMyOrderBinding binding;
     DatabaseReference databaseReference;
-    private MyOrderAdapter myOrderAdapter;
+    private MyListOrderAdapter myListOrderAdapter;
+    private ArrayList<Order> orderArrayList;
+    String Processing = "Processing";
+    String Shipping = "Shipping";
+    String Delivered = "Delivered";
+    String Canceled = "Canceled";
+
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -96,6 +111,8 @@ public class MyOrderFragment extends Fragment {
         View view = binding.getRoot();
         //loaddata();
         binding.recyclerviewMyOrder.setLayoutManager(new LinearLayoutManager(getContext()));
+        orderArrayList = new ArrayList<>();
+        myListOrderAdapter = new MyListOrderAdapter(getActivity(), orderArrayList);
         EventClickAll();
         EventClickProcessing();
         EventClickShipping();
@@ -108,35 +125,75 @@ public class MyOrderFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 changeColor();
-                FirebaseRecyclerOptions<Order> options =
-                        new FirebaseRecyclerOptions.Builder<Order>()
-                                .setQuery(FirebaseDatabase.getInstance().getReference()
-                                        .child("Order").child(String.valueOf(SignIn.phone))
-                                        .orderByChild("status").equalTo("Canceled"), Order.class)
-                                .build();
-                MyOrderAdapter myOrderAdapter = new MyOrderAdapter(options);
-                binding.recyclerviewMyOrder.setAdapter(myOrderAdapter);
                 binding.btnCanceled.setTextColor(Color.RED);
-                myOrderAdapter.startListening();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+                databaseReference.orderByChild("Status").equalTo(Canceled).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        orderArrayList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Order order = dataSnapshot.getValue(Order.class);
+                            DataSnapshot productsSnapshot = dataSnapshot.child("Products");
+                            for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                                String imageProduct = productSnapshot.child("ImageProduct").getValue(String.class);
+                                order.setImageProduct(imageProduct);
+                            }
+                            orderArrayList.add(order);
+                        }
+                        Collections.sort(orderArrayList, new Comparator<Order>() {
+                            @Override
+                            public int compare(Order order1, Order order2) {
+                                return order2.getOrderPlace().compareTo(order1.getOrderPlace());
+                            }
+                        });
+                        myListOrderAdapter.notifyDataSetChanged();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle the error if needed
+                    }
+                });
+                binding.recyclerviewMyOrder.setAdapter(myListOrderAdapter);
+                myListOrderAdapter.notifyDataSetChanged();
             }
         });
     }
-    private void EventClickDelivered() {
 
+    private void EventClickDelivered() {
         binding.btnDelivered.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 changeColor();
-                FirebaseRecyclerOptions<Order> options =
-                        new FirebaseRecyclerOptions.Builder<Order>()
-                                .setQuery(FirebaseDatabase.getInstance().getReference()
-                                        .child("Order").child(String.valueOf(SignIn.phone))
-                                        .orderByChild("status").equalTo("Delivered"), Order.class)
-                                .build();
-                MyOrderAdapter myOrderAdapter = new MyOrderAdapter(options);
-                binding.recyclerviewMyOrder.setAdapter(myOrderAdapter);
                 binding.btnDelivered.setTextColor(Color.RED);
-                myOrderAdapter.startListening();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+                databaseReference.orderByChild("Status").equalTo(Delivered).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        orderArrayList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Order order = dataSnapshot.getValue(Order.class);
+                            DataSnapshot productsSnapshot = dataSnapshot.child("Products");
+                            for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                                String imageProduct = productSnapshot.child("ImageProduct").getValue(String.class);
+                                order.setImageProduct(imageProduct);
+                            }
+                            orderArrayList.add(order);
+                        }
+                        Collections.sort(orderArrayList, new Comparator<Order>() {
+                            @Override
+                            public int compare(Order order1, Order order2) {
+                                return order2.getOrderPlace().compareTo(order1.getOrderPlace());
+                            }
+                        });
+                        myListOrderAdapter.notifyDataSetChanged();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle the error if needed
+                    }
+                });
+                binding.recyclerviewMyOrder.setAdapter(myListOrderAdapter);
+                myListOrderAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -146,17 +203,36 @@ public class MyOrderFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 changeColor();
-                FirebaseRecyclerOptions<Order> options =
-                        new FirebaseRecyclerOptions.Builder<Order>()
-                                .setQuery(FirebaseDatabase.getInstance().getReference()
-                                        .child("Order").child(String.valueOf(SignIn.phone))
-                                        .orderByChild("status").equalTo("Shipping"), Order.class)
-                                .build();
-                MyOrderAdapter myOrderAdapter = new MyOrderAdapter(options);
-                binding.recyclerviewMyOrder.setAdapter(myOrderAdapter);
                 binding.btnShipping.setTextColor(Color.RED);
-
-                myOrderAdapter.startListening();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+                databaseReference.orderByChild("Status").equalTo(Shipping).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        orderArrayList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Order order = dataSnapshot.getValue(Order.class);
+                            DataSnapshot productsSnapshot = dataSnapshot.child("Products");
+                            for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                                String imageProduct = productSnapshot.child("ImageProduct").getValue(String.class);
+                                order.setImageProduct(imageProduct);
+                            }
+                            orderArrayList.add(order);
+                        }
+                        Collections.sort(orderArrayList, new Comparator<Order>() {
+                            @Override
+                            public int compare(Order order1, Order order2) {
+                                return order2.getOrderPlace().compareTo(order1.getOrderPlace());
+                            }
+                        });
+                        myListOrderAdapter.notifyDataSetChanged();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle the error if needed
+                    }
+                });
+                binding.recyclerviewMyOrder.setAdapter(myListOrderAdapter);
+                myListOrderAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -166,21 +242,41 @@ public class MyOrderFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 changeColor();
-                FirebaseRecyclerOptions<Order> options =
-                        new FirebaseRecyclerOptions.Builder<Order>()
-                                .setQuery(FirebaseDatabase.getInstance().getReference()
-                                        .child("Order").child(String.valueOf(SignIn.phone))
-                                        .orderByChild("status").equalTo("Processing"), Order.class)
-                                .build();
-                MyOrderAdapter myOrderAdapter = new MyOrderAdapter(options);
-                binding.recyclerviewMyOrder.setAdapter(myOrderAdapter);
                 binding.btnProcessing.setTextColor(Color.RED);
-
-                myOrderAdapter.startListening();
+                databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+                databaseReference.orderByChild("Status").equalTo(Processing).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        orderArrayList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Order order = dataSnapshot.getValue(Order.class);
+                            DataSnapshot productsSnapshot = dataSnapshot.child("Products");
+                            for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                                String imageProduct = productSnapshot.child("ImageProduct").getValue(String.class);
+                                order.setImageProduct(imageProduct);
+                            }
+                            String DeliveredAddress = dataSnapshot.child("DeliveredAddress").getValue(String.class);
+                            order.setDeliveryAddress(DeliveredAddress);
+                            orderArrayList.add(order);
+                        }
+                        Collections.sort(orderArrayList, new Comparator<Order>() {
+                            @Override
+                            public int compare(Order order1, Order order2) {
+                                return order2.getOrderPlace().compareTo(order1.getOrderPlace());
+                            }
+                        });
+                        myListOrderAdapter.notifyDataSetChanged();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle the error if needed
+                    }
+                });
+                binding.recyclerviewMyOrder.setAdapter(myListOrderAdapter);
+                myListOrderAdapter.notifyDataSetChanged();
             }
         });
     }
-
     private void EventClickAll() {
         binding.btnAll.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,18 +284,40 @@ public class MyOrderFragment extends Fragment {
                 loaddata();
                 changeColor();
                 binding.btnAll.setTextColor(Color.RED);
-                // Start listening after setting the adapter
-                myOrderAdapter.startListening();
             }
         });
     }
     private void loaddata() {
-        FirebaseRecyclerOptions<Order> options =
-                new FirebaseRecyclerOptions.Builder<Order>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone)), Order.class)
-                        .build();
-        myOrderAdapter = new MyOrderAdapter(options);
-        binding.recyclerviewMyOrder.setAdapter(myOrderAdapter);
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                orderArrayList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Order order = dataSnapshot.getValue(Order.class);
+                    DataSnapshot productsSnapshot = dataSnapshot.child("Products");
+                    for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                        String imageProduct = productSnapshot.child("ImageProduct").getValue(String.class);
+                        order.setImageProduct(imageProduct);
+                    }
+                    orderArrayList.add(order);
+                }
+                Collections.sort(orderArrayList, new Comparator<Order>() {
+                    @Override
+                    public int compare(Order order1, Order order2) {
+                        return order2.getOrderPlace().compareTo(order1.getOrderPlace());
+                    }
+                });
+                myListOrderAdapter.notifyDataSetChanged();
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle the error if needed
+            }
+        });
+
+        binding.recyclerviewMyOrder.setAdapter(myListOrderAdapter);
+        myListOrderAdapter.notifyDataSetChanged();
     }
     private void changeColor(){
         binding.btnAll.setTextColor(Color.parseColor("#000000"));
@@ -209,22 +327,4 @@ public class MyOrderFragment extends Fragment {
         binding.btnCanceled.setTextColor(Color.parseColor("#000000"));
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // Check if the adapter is not null before calling startListening()
-        if (myOrderAdapter != null) {
-            myOrderAdapter.startListening();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        // Check if the adapter is not null before calling stopListening()
-        if (myOrderAdapter != null) {
-            myOrderAdapter.stopListening();
-        }
-    }
 }

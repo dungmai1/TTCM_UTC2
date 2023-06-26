@@ -16,25 +16,28 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.FirebaseDatabase;
 import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
+import com.maidanhdung.ecommerce.activities.SignIn;
 import com.maidanhdung.ecommerce.fragments.EditAddressFragment;
 import com.maidanhdung.ecommerce.models.Address;
 
 import java.util.ArrayList;
 
-public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHolder> {
+public class AddressAdapter extends FirebaseRecyclerAdapter<Address,AddressAdapter.ViewHolder> {
     private Context context;
     private ArrayList<Address> addressArrayList;
     int SelectedPosition = -1;
     private String selectedAddress;
     IAddressRecyclerview mListener;
-    public AddressAdapter(){
-    }
-    public AddressAdapter(Context context, ArrayList<Address> addressArrayList, IAddressRecyclerview mListener) {
-        this.mListener = mListener;
-        this.context = context;
+
+    public AddressAdapter(@NonNull FirebaseRecyclerOptions<Address> options,ArrayList<Address> addressArrayList, IAddressRecyclerview mListener) {
+        super(options);
         this.addressArrayList = addressArrayList;
+        this.mListener = mListener;
     }
 
     @NonNull
@@ -43,13 +46,14 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_address,parent,false);
         return new ViewHolder(view);
     }
+
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        holder.txtAddress.setText(addressArrayList.get(position).getName() + "," +
-                addressArrayList.get(position).getProvince() + "," +
-                addressArrayList.get(position).getSubDistrict() + "," +
-                addressArrayList.get(position).getProvince() + "," +
-                addressArrayList.get(position).getStreetAddress());
+    protected void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Address address) {
+        holder.txtAddress.setText(address.getName() + "," +
+                address.getProvince() + "," +
+                address.getSubDistrict() + "," +
+                address.getProvince() + "," +
+                address.getStreetAddress());
         holder.radioButton.setChecked(position == SelectedPosition);
         holder.radioButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,26 +63,23 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
                 notifyDataSetChanged();
             }
         });
+        String key = getRef(holder.getAdapterPosition()).getKey();
         holder.txtEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AppCompatActivity activity = (AppCompatActivity) view.getContext();
                 activity.getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout,
                         new EditAddressFragment(
-                                addressArrayList.get(position).getName(),
-                                addressArrayList.get(position).getProvince(),
-                                addressArrayList.get(position).getDistrict(),
-                                addressArrayList.get(position).getSubDistrict(),
-                                addressArrayList.get(position).getStreetAddress(),
-                                addressArrayList.get(position).getPhone())).addToBackStack(null).commit();
+                                key,
+                                address.getName(),
+                                address.getProvince(),
+                                address.getDistrict(),
+                                address.getSubDistrict(),
+                                address.getStreetAddress(),
+                                address.getPhone())).addToBackStack(null).commit();
                 //mListener.gotoEditAddress();
             }
         });
-    }
-
-    @Override
-    public int getItemCount() {
-        return addressArrayList.size();
     }
     public String getSelectedItems() {
         return selectedAddress;

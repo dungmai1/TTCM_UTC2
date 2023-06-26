@@ -82,13 +82,41 @@ public class AddAdressFragment extends Fragment {
                 String district = binding.editTextDistrict.getText().toString();
                 String subdistrict = binding.editTextSubDistrict.getText().toString();
                 String streetaddress = binding.editTextAddress.getText().toString();
-                int phone = Integer.parseInt(binding.editTextPhone.getText().toString());
-                databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
-                String ID = databaseReference.push().getKey();
-                Address address = new Address(name,province,subdistrict,district,streetaddress,phone);
-                databaseReference.child(ID).setValue(address);
-                Toast.makeText(getContext(),"Add new address succesfully",Toast.LENGTH_LONG).show();
-                getFragmentManager().popBackStack();
+                String phoneString = binding.editTextPhone.getText().toString();
+                int phone =0;
+                if (name.isEmpty()) {
+                    binding.editTextName.setError("Please enter a name");
+                }
+                if (province.isEmpty()) {
+                    binding.editTextProvince.setError("Please enter a province");
+                }
+                if (district.isEmpty()) {
+                    binding.editTextDistrict.setError("Please enter a district");
+                }
+                if (subdistrict.isEmpty()) {
+                    binding.editTextSubDistrict.setError("Please enter a subdistrict");
+                }
+                if (streetaddress.isEmpty()) {
+                    binding.editTextAddress.setError("Please enter a street address");
+                }
+                if (phoneString.isEmpty()) {
+                    // Phone number field is empty
+                    binding.editTextPhone.setError("Please enter a phone number");
+                    return;
+                }
+                try {
+                    phone = Integer.parseInt(phoneString);
+                } catch (NumberFormatException e) {
+                    binding.editTextPhone.setError("Please enter a valid phone number");
+                }
+                if(!name.isEmpty()||!province.isEmpty()||!district.isEmpty()||!subdistrict.isEmpty()||!streetaddress.isEmpty()||!phoneString.isEmpty()){
+                    databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
+                    String ID = databaseReference.push().getKey();
+                    Address address = new Address(name,province,subdistrict,district,streetaddress,phone);
+                    databaseReference.child(ID).setValue(address);
+                    Toast.makeText(getContext(),"Add new address succesfully",Toast.LENGTH_LONG).show();
+                    getFragmentManager().popBackStack();
+                }
             }
         });
         return view;

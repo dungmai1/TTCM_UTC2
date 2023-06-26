@@ -63,7 +63,8 @@ public class PaymentFragment extends Fragment {
     FragmentPaymentBinding binding;
     private PaymentAdapter paymentAdapter;
     DatabaseReference databaseReference,database;
-    public static String strtext;
+    public  String address;
+    public static int total;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -129,9 +130,9 @@ public class PaymentFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener("data", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                strtext = result.getString("address");
-                if(strtext!=null){
-                    binding.txtAddressPayment.setText(strtext);
+                address = result.getString("address");
+                if(address!=null){
+                    binding.txtAddressPayment.setText(address);
                 }else{
                     binding.txtAddressPayment.setText("+ Add Address");
                 }
@@ -148,23 +149,32 @@ public class PaymentFragment extends Fragment {
                     Toast.makeText(getContext(),"Select a payment method",Toast.LENGTH_LONG).show();
                 }else{
                     if(binding.RadioBTNPaymentonDelivery.isChecked()){
+                        String PaymentMethod = "Payment to Delivery";
+                        String Status = "Processing";
                         Calendar calendar = Calendar.getInstance();
-                        Date currentTime = calendar.getTime();
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                        String formattedTime = dateFormat.format(currentTime);
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
+                        String formattedTime = dateFormat.format(calendar.getTime());
+                        addOrder(PaymentMethod,Status,total,formattedTime,address);
                         databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(String.valueOf(SignIn.phone));
                         database = FirebaseDatabase.getInstance().getReference("Order").child(String.valueOf(SignIn.phone));
-                        databaseReference.addValueEventListener(new ValueEventListener() {
+                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                int NumberProduct = 0;
                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    String ID = database.push().getKey();
                                     String productname = dataSnapshot.child("productName").getValue(String.class);
                                     int price = dataSnapshot.child("price").getValue(int.class);
                                     int quality = dataSnapshot.child("quality").getValue(int.class);
                                     String ImageProduct = dataSnapshot.child("imageURL").getValue(String.class);
-                                    String ID = databaseReference.push().getKey();
-                                    Order order = new Order(productname,"Processing",formattedTime,strtext,ImageProduct,price,quality);
-                                    database.child(ID).setValue(order);
+                                    HashMap<String, Object> products = new HashMap<>();
+                                    products.put("productname",productname );
+                                    products.put("price",price);
+                                    products.put("quality",quality);
+                                    products.put("ImageProduct",ImageProduct);
+                                    NumberProduct+=1;
+                                    database.child(formattedTime).child("Products").child(ID).updateChildren(products);
+                                    database.child(formattedTime).child("NumberProduct").setValue(NumberProduct);
                                 }
                             }
                             @Override
@@ -183,7 +193,16 @@ public class PaymentFragment extends Fragment {
             }
         });
     }
-
+    private void addOrder(String PaymentMethod,String Status, int total, String formattedTime,String DeliveryAddress){
+        HashMap order = new HashMap();
+        order.put("PaymentMethod",PaymentMethod );
+        order.put("Status",Status);
+        order.put("Total",total);
+        order.put("OrderPlace",formattedTime);
+        order.put("DeliveryAddress",DeliveryAddress);
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+        databaseReference.child(formattedTime).setValue(order);
+    }
     private void EventClickAddressPayment() {
         binding.txtAddressPayment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -198,15 +217,15 @@ public class PaymentFragment extends Fragment {
         binding.recyclerviewPayment.setLayoutManager(new LinearLayoutManager(getContext()));
         FirebaseRecyclerOptions<Cart> options =
                 new FirebaseRecyclerOptions.Builder<Cart>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Cart").child(SignIn.txtPhone), Cart.class)
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Cart").child(String.valueOf(SignIn.phone)), Cart.class)
                         .build();
         paymentAdapter = new PaymentAdapter(options);
         binding.recyclerviewPayment.setAdapter(paymentAdapter);
-        databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(SignIn.txtPhone);
+        databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(String.valueOf(SignIn.phone));
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int total = 0;
+                total = 0;
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     int price = dataSnapshot.child("price").getValue(int.class);
                     int quality = dataSnapshot.child("quality").getValue(int.class);

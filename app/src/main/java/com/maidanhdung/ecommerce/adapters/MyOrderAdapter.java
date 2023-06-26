@@ -1,5 +1,6 @@
 package com.maidanhdung.ecommerce.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,30 +17,19 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
 import com.maidanhdung.ecommerce.models.Order;
+import com.maidanhdung.ecommerce.models.Products;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MyOrderAdapter extends FirebaseRecyclerAdapter<Order,MyOrderAdapter.ViewHolder> {
-    public MyOrderAdapter(@NonNull FirebaseRecyclerOptions<Order> options) {
-        super(options);
-    }
-    @Override
-    protected void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull Order order) {
-        Glide.with(holder.imageURL.getContext())
-                .load(order.getImageProduct())
-                .into(holder.imageURL);
-        holder.productName.setText(order.getProduct());
-        holder.Quality.setText("Quality: "+String.valueOf(order.getQuality()));
-        DecimalFormat decimalFormat = new DecimalFormat("#,###");
-        String PriceFormat = decimalFormat.format(order.getPrice());
-        holder.Price.setText(PriceFormat+" VNĐ");
-        int quality = order.getQuality();
-        int price = order.getPrice();
-        int total = quality*price;
-        String TotalFormat = decimalFormat.format(total);
-        holder.Total.setText(TotalFormat+ " VNĐ");
-        holder.Status.setText(order.getStatus());
+public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHolder> {
+    private Context context;
+    private ArrayList<Order> orders;
+
+    public MyOrderAdapter(Context context, ArrayList<Order> orders) {
+        this.context = context;
+        this.orders = orders;
     }
 
     @NonNull
@@ -47,6 +37,29 @@ public class MyOrderAdapter extends FirebaseRecyclerAdapter<Order,MyOrderAdapter
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_myorder,parent,false);
         return  new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Glide.with(holder.imageURL.getContext())
+                .load(orders.get(position).getImageProduct())
+                .into(holder.imageURL);
+        holder.productName.setText(orders.get(position).getProduct());
+        holder.Quality.setText("Quality: "+String.valueOf(orders.get(position).getQuality()));
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String PriceFormat = decimalFormat.format(orders.get(position).getPrice());
+        holder.Price.setText(PriceFormat+" VNĐ");
+        int quality = orders.get(position).getQuality();
+        int price = orders.get(position).getPrice();
+        int total = quality*price;
+        String TotalFormat = decimalFormat.format(total);
+        holder.Total.setText(TotalFormat+ " VNĐ");
+        holder.Status.setText(orders.get(position).getStatus());
+    }
+
+    @Override
+    public int getItemCount() {
+        return orders.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{

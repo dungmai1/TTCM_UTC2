@@ -2,6 +2,7 @@ package com.maidanhdung.ecommerce.fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.maidanhdung.ecommerce.R;
@@ -21,6 +24,7 @@ import com.maidanhdung.ecommerce.databinding.FragmentYourAddressBinding;
 import com.maidanhdung.ecommerce.models.Address;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,9 +44,10 @@ public class EditAddressFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private AddressAdapter addressAdapter;
-    String name,province,district,subdistrict,streetaddress;
+    String name,province,district,subdistrict,streetaddress,key;
     int phone;
-    public EditAddressFragment(String name,String province,String district,String subdistrict,String streetaddress,int phone) {
+    public EditAddressFragment(String key,String name,String province,String district,String subdistrict,String streetaddress,int phone) {
+        this.key = key;
         this.name = name;
         this.province = province;
         this.district = district;
@@ -91,16 +96,47 @@ public class EditAddressFragment extends Fragment {
         binding.edtSubDistrictEdit.setText(subdistrict);
         binding.edtStreetAddressEdit.setText(streetaddress);
         binding.edtPhoneEdit.setText(String.valueOf(phone));
-        EvenClickDeleteAddress();
+        EventClickDeleteAddress();
+        EventClickSaveEdit();
         return view;
     }
 
-    private void EvenClickDeleteAddress() {
+    private void EventClickSaveEdit() {
+        binding.btnSaveEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String name = binding.edtNameEdit.getText().toString();
+                String province = binding.edtProvinceEdit.getText().toString();
+                String district = binding.edtDistrictEdit.getText().toString();
+                String subdistrict = binding.edtSubDistrictEdit.getText().toString();
+                String streetaddress = binding.edtStreetAddressEdit.getText().toString();
+                int phone = Integer.parseInt(binding.edtPhoneEdit.getText().toString());
+
+                updatedata(name,province,district,subdistrict,streetaddress,phone);
+            }
+        });
+    }
+    private void updatedata(String name, String province, String district, String subdistrict, String streetaddress,int phone){
+        HashMap address = new HashMap();
+        address.put("name",name );
+        address.put("province",province);
+        address.put("district",district);
+        address.put("streetAddress",streetaddress);
+        address.put("subDistrict",subdistrict);
+        address.put("phone",phone);
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("Address").child(String.valueOf(SignIn.phone));
+        databaseReference.child(key).updateChildren(address);
+        Toast.makeText(getContext(),"Update Success",Toast.LENGTH_LONG).show();
+        getFragmentManager().popBackStack();
+    }
+    private void EventClickDeleteAddress() {
         binding.btnDeleteAddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 databaseReference = FirebaseDatabase.getInstance().getReference().child("Address").child(String.valueOf(SignIn.phone));
-                databaseReference.orderByChild("")
+                databaseReference.child(key).removeValue();
+                Toast.makeText(getContext(),"Delete Address Success",Toast.LENGTH_LONG).show();
+                getFragmentManager().popBackStack();
             }
         });
     }
