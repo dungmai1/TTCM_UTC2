@@ -7,9 +7,13 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -20,8 +24,22 @@ import com.google.firebase.database.ValueEventListener;
 import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.activities.Home;
 import com.maidanhdung.ecommerce.activities.SignIn;
+import com.maidanhdung.ecommerce.api.ApiService;
 import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
 import com.maidanhdung.ecommerce.databinding.FragmentProfileBinding;
+import com.maidanhdung.ecommerce.models.District;
+import com.maidanhdung.ecommerce.models.Province;
+import com.maidanhdung.ecommerce.models.ResultWrapper;
+import com.maidanhdung.ecommerce.models.ResultWrapper1;
+import com.maidanhdung.ecommerce.models.ResultWrapper2;
+import com.maidanhdung.ecommerce.models.Ward;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,7 +62,6 @@ public class ProfileFragment extends Fragment {
     private static String lastname;
     private static int phone;
     private static int PhoneNumber;
-
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -88,9 +105,9 @@ public class ProfileFragment extends Fragment {
         EventClickEditProfile();
         EventClickChangethePassword();
         EventClickLogout();
-
         return view;
     }
+
     private void loaddata() {
         String phone = SignIn.txtPhone;
         binding.imgProfile.setImageDrawable(getResources().getDrawable(R.drawable.person));

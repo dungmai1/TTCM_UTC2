@@ -79,6 +79,8 @@
                 android:layout_marginTop="20dp"
                 android:text="Logout"
                 android:textSize="20sp" />
+
         </LinearLayout>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

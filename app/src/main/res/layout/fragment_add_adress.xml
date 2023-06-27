@@ -29,8 +29,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"/>
-    <EditText
-        android:id="@+id/editTextProvince"
+    <Spinner
+        android:id="@+id/spinner_province"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Province"
@@ -38,8 +38,8 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"/>
 
-    <EditText
-        android:id="@+id/editTextDistrict"
+    <Spinner
+        android:id="@+id/spinner_district"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="District"
@@ -48,8 +48,8 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"/>
 
-    <EditText
-        android:id="@+id/editTextSubDistrict"
+    <Spinner
+        android:id="@+id/spinner_subdistrict"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Sub-district/Village"

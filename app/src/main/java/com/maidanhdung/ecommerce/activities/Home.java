@@ -13,7 +13,6 @@ import com.maidanhdung.ecommerce.fragments.CartFragment;
 import com.maidanhdung.ecommerce.fragments.HomeFragment;
 import com.maidanhdung.ecommerce.adapters.MyAdapter;
 import com.maidanhdung.ecommerce.fragments.MyOrderFragment;
-import com.maidanhdung.ecommerce.fragments.OrderHistoryFragment;
 import com.maidanhdung.ecommerce.fragments.ProfileFragment;
 import com.maidanhdung.ecommerce.R;
 import com.maidanhdung.ecommerce.databinding.ActivityHomeBinding;

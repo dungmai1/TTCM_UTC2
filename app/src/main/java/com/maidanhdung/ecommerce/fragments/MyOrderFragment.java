@@ -255,8 +255,8 @@ public class MyOrderFragment extends Fragment {
                                 String imageProduct = productSnapshot.child("ImageProduct").getValue(String.class);
                                 order.setImageProduct(imageProduct);
                             }
-                            String DeliveredAddress = dataSnapshot.child("DeliveredAddress").getValue(String.class);
-                            order.setDeliveryAddress(DeliveredAddress);
+//                            String DeliveredAddress = dataSnapshot.child("DeliveredAddress").getValue(String.class);
+//                            order.setDeliveryAddress(DeliveredAddress);
                             orderArrayList.add(order);
                         }
                         Collections.sort(orderArrayList, new Comparator<Order>() {
