@@ -1,14 +1,12 @@
 package com.maidanhdung.ecommerce.fragments;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Handler;
@@ -16,29 +14,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.maidanhdung.ecommerce.R;
+import com.maidanhdung.ecommerce.ModelsApi.DataFee;
+import com.maidanhdung.ecommerce.ModelsApi.DataProvince;
+import com.maidanhdung.ecommerce.ModelsApi.Fee;
+import com.maidanhdung.ecommerce.ModelsApi.Province;
 import com.maidanhdung.ecommerce.activities.Home;
 import com.maidanhdung.ecommerce.activities.ProductDetailActivity;
 import com.maidanhdung.ecommerce.activities.SignIn;
-import com.maidanhdung.ecommerce.adapters.CartAdapter;
-import com.maidanhdung.ecommerce.adapters.MyAdapter;
 import com.maidanhdung.ecommerce.adapters.PaymentAdapter;
-import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
+import com.maidanhdung.ecommerce.api.ApiService;
 import com.maidanhdung.ecommerce.databinding.FragmentPaymentBinding;
-import com.maidanhdung.ecommerce.models.Address;
 import com.maidanhdung.ecommerce.models.Cart;
-import com.maidanhdung.ecommerce.models.Order;
-import com.maidanhdung.ecommerce.models.Products;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,10 +43,14 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import vn.momo.momo_partner.AppMoMoLib;
 
 /**
@@ -81,7 +81,10 @@ public class PaymentFragment extends Fragment {
     private String merchantCode = "SCB01";
     private String merchantNameLabel = "Nhà cung cấp";
     private String description = "Thanh toán dịch vụ ABC";
-
+    private int selectedWardId;
+    private int selectedDistrictId;
+    public static int service_fee;
+    public static int TotalPayment;
     public PaymentFragment() {
         // Required empty public constructor
     }
@@ -131,12 +134,16 @@ public class PaymentFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
                 address = result.getString("address");
+                selectedWardId = result.getInt("WardId");
+                selectedDistrictId = result.getInt("DistrictID");
+                loadApiFee(selectedDistrictId, String.valueOf(selectedWardId));
                 if(address!=null){
                     binding.txtAddressPayment.setText(address);
                 }else{
                     binding.txtAddressPayment.setText("+ Add Address");
                 }
             }
+            //RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{ \"from_district_id\": 1454, \"from_ward_code\": \"21211\", \"service_id\": 53320, \"service_type_id\": null, \"to_district_id\": 1452, \"to_ward_code\": \"21012\", \"height\": 50, \"length\": 20, \"weight\": 200, \"width\": 20, \"insurance_value\": 10000, \"cod_failed_amount\": 2000, \"coupon\": null }");
         });
     }
     private void EventClickPaymentDone() {
@@ -154,7 +161,7 @@ public class PaymentFragment extends Fragment {
                         Calendar calendar = Calendar.getInstance();
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
                         String formattedTime = dateFormat.format(calendar.getTime());
-                        addOrder(PaymentMethod,Status,total,formattedTime,address);
+                        addOrder(PaymentMethod,Status,TotalPayment,formattedTime,address);
                         databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(String.valueOf(SignIn.phone));
                         database = FirebaseDatabase.getInstance().getReference("Order").child(String.valueOf(SignIn.phone));
                         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -233,7 +240,7 @@ public class PaymentFragment extends Fragment {
                 }
                 DecimalFormat decimalFormat = new DecimalFormat("#,###");
                 String totalFormat = decimalFormat.format(total);
-                binding.TotalPayment.setText("Total: " + totalFormat+ " VNĐ");
+                binding.TotalAM.setText("Cash: " + totalFormat+ " VNĐ");
                 //Toast.makeText(getContext(),String.valueOf(total),Toast.LENGTH_LONG).show();
                 paymentAdapter.notifyDataSetChanged();
             }
@@ -326,6 +333,33 @@ public class PaymentFragment extends Fragment {
             }
         };
         handler.postDelayed(runnable, 2000);
+    }
+    private void loadApiFee(int selectedDistrictId, String selectedWardId){
+        String Token = "804559c8-14d0-11ee-8430-a61cf7de0a67";
+        int ShopId = 124927;
+        ApiService.apiGHNFee.getFee(Token,1451,"20905",53320,2,
+                selectedDistrictId,selectedWardId,200).enqueue(new Callback<Fee>() {
+            @Override
+            public void onResponse(Call<Fee> call, Response<Fee> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Fee fee = response.body();
+                    DecimalFormat decimalFormat = new DecimalFormat("#,###");
+                    service_fee = fee.getData().getService_fee();
+                    String service_feeFormat = decimalFormat.format(service_fee);
+                    binding.txtTransportFee.setText("Transport Fee: "+service_feeFormat+" VNĐ");
+                    TotalPayment = total + service_fee;
+                    String TotalPaymentFormat = decimalFormat.format(TotalPayment);
+                    binding.TotalPayment.setText("Total Amount: "+TotalPaymentFormat+ " VNĐ");
+                } else {
+                    // Handle the case when the response is not successful or the response body is null
+                    Toast.makeText(getContext(), "Response error", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Fee> call, Throwable t) {
+                Toast.makeText(getContext(),"call api sai",Toast.LENGTH_LONG).show();
+            }
+        });
     }
     @Override
     public void onStart() {

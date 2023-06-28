@@ -2,24 +2,18 @@ package com.maidanhdung.ecommerce.models;
 
 public class Address {
     String Name, Province, SubDistrict, District, StreetAddress;
-    int Phone;
+    int Phone,WardId,DistrictId;
     public Address(){}
 
-    public Address(String name, String province, String subDistrict, String district, String streetAddress, int phone) {
+    public Address(String name, String province, String subDistrict, String district, String streetAddress, int phone, int wardId, int districtId) {
         Name = name;
         Province = province;
         SubDistrict = subDistrict;
         District = district;
         StreetAddress = streetAddress;
         Phone = phone;
-    }
-
-    public String getSubDistrict() {
-        return SubDistrict;
-    }
-
-    public void setSubDistrict(String subDistrict) {
-        SubDistrict = subDistrict;
+        WardId = wardId;
+        DistrictId = districtId;
     }
 
     public String getName() {
@@ -38,6 +32,13 @@ public class Address {
         Province = province;
     }
 
+    public String getSubDistrict() {
+        return SubDistrict;
+    }
+
+    public void setSubDistrict(String subDistrict) {
+        SubDistrict = subDistrict;
+    }
 
     public String getDistrict() {
         return District;
@@ -61,5 +62,21 @@ public class Address {
 
     public void setPhone(int phone) {
         Phone = phone;
+    }
+
+    public int getWardId() {
+        return WardId;
+    }
+
+    public void setWardId(int wardId) {
+        WardId = wardId;
+    }
+
+    public int getDistrictId() {
+        return DistrictId;
+    }
+
+    public void setDistrictId(int districtId) {
+        DistrictId = districtId;
     }
 }

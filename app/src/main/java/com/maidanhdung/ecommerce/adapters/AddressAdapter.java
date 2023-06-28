@@ -31,6 +31,7 @@ public class AddressAdapter extends FirebaseRecyclerAdapter<Address,AddressAdapt
     private Context context;
     private ArrayList<Address> addressArrayList;
     int SelectedPosition = -1;
+    int WardID, DistrictID;
     private String selectedAddress;
     IAddressRecyclerview mListener;
 
@@ -60,6 +61,8 @@ public class AddressAdapter extends FirebaseRecyclerAdapter<Address,AddressAdapt
             public void onClick(View view) {
                 SelectedPosition = holder.getAdapterPosition();
                 selectedAddress = holder.txtAddress.getText().toString();
+                WardID = address.getWardId();
+                DistrictID = address.getDistrictId();
                 notifyDataSetChanged();
             }
         });
@@ -83,6 +86,12 @@ public class AddressAdapter extends FirebaseRecyclerAdapter<Address,AddressAdapt
     }
     public String getSelectedItems() {
         return selectedAddress;
+    }
+    public int getWardID(){
+        return WardID;
+    }
+    public int getDistrictID(){
+        return DistrictID;
     }
     public class ViewHolder extends RecyclerView.ViewHolder{
         RadioButton radioButton;

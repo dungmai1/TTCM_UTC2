@@ -14,18 +14,16 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.maidanhdung.ecommerce.R;
+import com.maidanhdung.ecommerce.ModelsApi.DataDistrict;
+import com.maidanhdung.ecommerce.ModelsApi.DataWard;
+import com.maidanhdung.ecommerce.ModelsApi.District;
+import com.maidanhdung.ecommerce.ModelsApi.Ward;
 import com.maidanhdung.ecommerce.activities.SignIn;
 import com.maidanhdung.ecommerce.api.ApiService;
 import com.maidanhdung.ecommerce.databinding.FragmentAddAdressBinding;
-import com.maidanhdung.ecommerce.databinding.FragmentCartBinding;
 import com.maidanhdung.ecommerce.models.Address;
-import com.maidanhdung.ecommerce.models.District;
-import com.maidanhdung.ecommerce.models.Province;
-import com.maidanhdung.ecommerce.models.ResultWrapper;
-import com.maidanhdung.ecommerce.models.ResultWrapper1;
-import com.maidanhdung.ecommerce.models.ResultWrapper2;
-import com.maidanhdung.ecommerce.models.Ward;
+import com.maidanhdung.ecommerce.ModelsApi.DataProvince;
+import com.maidanhdung.ecommerce.ModelsApi.Province;
 
 import java.util.ArrayList;
 
@@ -52,11 +50,13 @@ public class AddAdressFragment extends Fragment {
     private String mParam2;
     ArrayAdapter<String> arrayAdapter;
     ArrayList<String> arrayList;
-    String selectedProvinceId;
-    String selectedDistrictId;
-    String selectedDistrict;
-    String selectedSubDistrict;
-    String selectedProvince;
+    int selectedProvinceId;
+    int selectedDistrictId;
+    String selectedWardId;
+    String selectedDistrictName;
+    String selectedSubDistrictName;
+    String selectedProvinceName;
+    String token = "804559c8-14d0-11ee-8430-a61cf7de0a67";
 
 
     public AddAdressFragment() {
@@ -90,6 +90,7 @@ public class AddAdressFragment extends Fragment {
         }
 
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -101,13 +102,13 @@ public class AddAdressFragment extends Fragment {
         binding.btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectedDistrict = binding.spinnerDistrict.getSelectedItem().toString();
-                selectedProvince = binding.spinnerProvince.getSelectedItem().toString();
-                selectedSubDistrict =  binding.spinnerSubdistrict.getSelectedItem().toString();
+                selectedDistrictName = binding.spinnerDistrict.getSelectedItem().toString();
+                selectedProvinceName = binding.spinnerProvince.getSelectedItem().toString();
+                selectedSubDistrictName = binding.spinnerSubdistrict.getSelectedItem().toString();
                 String name = binding.editTextName.getText().toString();
                 String streetaddress = binding.editTextAddress.getText().toString();
                 String phoneString = binding.editTextPhone.getText().toString();
-                int phone =0;
+                int phone = 0;
                 if (name.isEmpty()) {
                     binding.editTextName.setError("Please enter a name");
                 }
@@ -124,141 +125,155 @@ public class AddAdressFragment extends Fragment {
                 } catch (NumberFormatException e) {
                     binding.editTextPhone.setError("Please enter a valid phone number");
                 }
-                if(!name.isEmpty()||!streetaddress.isEmpty()||!phoneString.isEmpty()){
+                if (!name.isEmpty() || !streetaddress.isEmpty() || !phoneString.isEmpty()) {
                     databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
                     String ID = databaseReference.push().getKey();
-                    Address address = new Address(name,selectedProvince,selectedSubDistrict,selectedDistrict,streetaddress,phone);
+                    Address address = new Address(name, selectedProvinceName, selectedDistrictName, selectedSubDistrictName, streetaddress, phone,Integer.parseInt(selectedWardId),selectedDistrictId);
                     databaseReference.child(ID).setValue(address);
-                    Toast.makeText(getContext(),"Add new address succesfully",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Add new address succesfully", Toast.LENGTH_LONG).show();
                     getFragmentManager().popBackStack();
                 }
             }
         });
         return view;
     }
-    private void loadWard(String DistrictID){
-        ApiService.apiservice.loadWard(DistrictID).enqueue(new Callback<ResultWrapper2>() {
-            @Override
-            public void onResponse(Call<ResultWrapper2> call, Response<ResultWrapper2> response) {
-                ResultWrapper2 resultWrapper2 = response.body();
-                if (resultWrapper2 != null && resultWrapper2.results != null) {
-                    Ward[] wards = resultWrapper2.results;
-                    if (wards.length > 0) {
-                        ArrayList<String> arrayList2 = new ArrayList<>();
-                        for (Ward ward : wards) {
-                            arrayList2.add(ward.getWard_name());
-                        }
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arrayList2);
-                        binding.spinnerSubdistrict.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        Toast.makeText(getContext(), "No districts available", Toast.LENGTH_LONG).show();
-                    }
-                    Toast.makeText(getContext(), "Succes" +
-                            "s ", Toast.LENGTH_LONG).show();
-
-                } else {
-                    Toast.makeText(getContext(), "Empty district response", Toast.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResultWrapper2> call, Throwable t) {
-
-            }
-        });
-    }
     private void loadProvince() {
-        ApiService.apiservice.loadProvince().enqueue(new Callback<ResultWrapper>() {
+        ApiService.apiGHN.getProvince(token).enqueue(new Callback<Province>() {
             @Override
-            public void onResponse(Call<ResultWrapper> call, Response<ResultWrapper> response) {
-                ResultWrapper resultWrapper = response.body();
-                Province[] provinces = resultWrapper.results;
-                if (provinces != null && provinces.length > 0) {
-                    ArrayList<String> arrayList = new ArrayList<>();
-                    for (Province province : provinces) {
-                        arrayList.add(province.getProvince_name());
-                    }
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arrayList);
-                    binding.spinnerProvince.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-
-                    binding.spinnerProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            String selectedProvinceName = arrayList.get(position);
-                            for (Province province : provinces) {
-                                if (province.getProvince_name().equals(selectedProvinceName)) {
-                                    selectedProvinceId = province.getProvince_id();
-                                    // Gọi API loadDistrict khi chọn tỉnh
-                                    loadDistrict(selectedProvinceId);
-                                    break;
-                                }
+            public void onResponse(Call<Province> call, Response<Province> response) {
+                if (response.isSuccessful()) {
+                    Province province = response.body();
+                    Log.d("Response",response.body().toString());
+                    if (province != null) {
+                        DataProvince[] list = province.data;
+                        if (list != null && list.length > 0) {
+                            ArrayList<String> arrayList = new ArrayList<>();
+                            for (DataProvince dataProvince : list) {
+                                arrayList.add(dataProvince.getProvinceName());
                             }
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
-                        }
-                    });
-
-                    Toast.makeText(getContext(), "Call API Success", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getContext(), "Empty response", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResultWrapper> call, Throwable t) {
-                Toast.makeText(getContext(), "Call API FAIL", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-    private void loadDistrict(String provinceId) {
-        ApiService.apiservice.loadDistrict(provinceId).enqueue(new Callback<ResultWrapper1>() {
-            @Override
-            public void onResponse(Call<ResultWrapper1> call, Response<ResultWrapper1> response) {
-                ResultWrapper1 districtResultWrapper = response.body();
-                if (districtResultWrapper != null && districtResultWrapper.results != null) {
-                    District[] districts = districtResultWrapper.results;
-                    if (districts.length > 0) {
-                        ArrayList<String> arrayList1 = new ArrayList<>();
-                        for (District district : districts) {
-                            arrayList1.add(district.getDistrict_name());
-                        }
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arrayList1);
-                        binding.spinnerDistrict.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                        binding.spinnerDistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                String selectedDistrictName = arrayList1.get(position);
-                                for (District district : districts) {
-                                    if (district.getDistrict_name().equals(selectedDistrictName)) {
-                                        selectedDistrictId = district.getDistrict_id();
-
-                                        loadWard(selectedDistrictId);
-                                        break;
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arrayList);
+                            binding.spinnerProvince.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                            binding.spinnerProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                    selectedProvinceName = arrayList.get(i);
+                                    for(DataProvince dataProvince : list){
+                                        if(selectedProvinceName.equals(dataProvince.getProvinceName())){
+                                            selectedProvinceId = dataProvince.getProvinceID();
+                                            loadDistrict(selectedProvinceId);
+                                        }
                                     }
                                 }
-                            }
+                                @Override
+                                public void onNothingSelected(AdapterView<?> adapterView) {
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "Response body is null", Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        Toast.makeText(getContext(), "No districts available", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Call API Fail", Toast.LENGTH_LONG).show();
                     }
-                    Toast.makeText(getContext(), "Seccess ", Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Province> call, Throwable t) {
 
-                } else {
-                    Toast.makeText(getContext(), "Empty district response", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    private void loadDistrict(int provinceID){
+        ApiService.apiGHN.getDistrict(token,provinceID).enqueue(new Callback<District>() {
+            @Override
+            public void onResponse(Call<District> call, Response<District> response) {
+                if (response.isSuccessful()) {
+                    District district = response.body();
+                    if (district != null) {
+                        DataDistrict[] list = district.data;
+                        if (list != null && list.length > 0) {
+                            ArrayList<String> arrayList = new ArrayList<>();
+                            for (DataDistrict dataDistrict : list) {
+                                arrayList.add(dataDistrict.getDistrictName());
+                            }
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arrayList);
+                            binding.spinnerDistrict.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                            binding.spinnerDistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                    selectedDistrictName = arrayList.get(i);
+                                    for(DataDistrict dataDistrict : list){
+                                        if(selectedDistrictName.equals(dataDistrict.getDistrictName())){
+                                            selectedDistrictId = dataDistrict.getDistrictID();
+                                            loadWard(selectedDistrictId);
+                                        }
+                                    }
+                                }
+                                @Override
+                                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "Response body is null", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Call API Fail", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<ResultWrapper1> call, Throwable t) {
-                Toast.makeText(getContext(), "Call API FAIL", Toast.LENGTH_LONG).show();
+            public void onFailure(Call<District> call, Throwable t) {
+
+            }
+        });
+    }
+    private void loadWard(int districtID){
+        ApiService.apiGHN.getWard(token,districtID).enqueue(new Callback<Ward>() {
+            @Override
+            public void onResponse(Call<Ward> call, Response<Ward> response) {
+                if (response.isSuccessful()) {
+                    Ward ward = response.body();
+                    if (ward != null) {
+                        DataWard[] list = ward.data;
+                        if (list != null && list.length > 0) {
+                            ArrayList<String> arrayList = new ArrayList<>();
+                            for (DataWard dataWard : list) {
+                                arrayList.add(dataWard.getWardName());
+                            }
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arrayList);
+                            binding.spinnerSubdistrict.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                            binding.spinnerSubdistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                    selectedSubDistrictName = arrayList.get(i);
+                                    for(DataWard dataWard : list){
+                                        if(selectedSubDistrictName.equals(dataWard.getWardName())){
+                                            selectedWardId = dataWard.getWardCode();
+                                        }
+                                    }
+                                }
+                                @Override
+                                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "Response body is null", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Call API Fail", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Ward> call, Throwable t) {
+
             }
         });
     }

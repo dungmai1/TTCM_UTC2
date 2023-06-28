@@ -109,6 +109,8 @@ public class YourAddressFragment extends Fragment implements AddressAdapter.IAdd
     public void sendataAddress(){
         Bundle bundle = new Bundle();
         bundle.putString("address", addressAdapter.getSelectedItems());
+        bundle.putInt("WardId",addressAdapter.getWardID());
+        bundle.putInt("DistrictID",addressAdapter.getDistrictID());
         getParentFragmentManager().setFragmentResult("data",bundle);
         getFragmentManager().popBackStack();
     }

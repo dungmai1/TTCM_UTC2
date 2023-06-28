@@ -19,7 +19,6 @@ import com.maidanhdung.ecommerce.databinding.ActivityHomeBinding;
 import com.maidanhdung.ecommerce.models.Products;
 
 import java.util.ArrayList;
-
 public class Home extends AppCompatActivity {
 
     ActivityHomeBinding binding;
@@ -27,7 +26,7 @@ public class Home extends AppCompatActivity {
 
     private ArrayList<Products> imageproducts;
     private MyAdapter myAdapter;
-
+    
     StorageReference storageReference;
 
     @Override
