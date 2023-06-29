@@ -442,20 +442,4 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-    private void loadImageCategory(){
-        databaseReference = FirebaseDatabase.getInstance().getReference("Products").child("Category");
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot productSnapshot : snapshot.getChildren()) {
-                    String ImageCategory = productSnapshot.child("ImageCategory").getValue(String.class);
-                    Log.i("ss",ImageCategory);
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-
-    }
 }

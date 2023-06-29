@@ -44,6 +44,7 @@ public class CartFragment extends Fragment {
     private CartAdapter cartAdapter;
     private DatabaseReference databaseReference;
     FragmentCartBinding binding;
+    String phone;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -92,6 +93,7 @@ public class CartFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_cart, container, false);
         binding = FragmentCartBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
+        binding.recyclerviewCart.setLayoutManager(new LinearLayoutManager(getContext()));
         loadCart();
         EventClickPayment();
         return view;
@@ -111,8 +113,7 @@ public class CartFragment extends Fragment {
         });
     }
     private void loadCart() {
-        String phone = String.valueOf(SignIn.phone);
-        binding.recyclerviewCart.setLayoutManager(new LinearLayoutManager(getContext()));
+        phone= String.valueOf(SignIn.phone);
         FirebaseRecyclerOptions<Cart> options =
                 new FirebaseRecyclerOptions.Builder<Cart>()
                         .setQuery(FirebaseDatabase.getInstance().getReference().child("Cart").child(phone), Cart.class)

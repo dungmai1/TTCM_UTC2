@@ -77,14 +77,18 @@ public class PaymentFragment extends Fragment {
     private String amount = "10000";
     private String fee = "0";
     int environment = 0;//developer default
-    private String merchantName = "Demo SDK";
-    private String merchantCode = "SCB01";
+    private String merchantName = "HoangNgoc";
+    private String merchantCode = "MOMOC2IC20220510";
     private String merchantNameLabel = "Nhà cung cấp";
-    private String description = "Thanh toán dịch vụ ABC";
+    private String description = "Thanh toán đơn hàng";
     private int selectedWardId;
     private int selectedDistrictId;
     public static int service_fee;
     public static int TotalPayment;
+    public static String token;
+    String Status = "Processing";
+    String formattedTime;
+    int NumberProduct = 0;
     public PaymentFragment() {
         // Required empty public constructor
     }
@@ -123,111 +127,24 @@ public class PaymentFragment extends Fragment {
         binding = FragmentPaymentBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
         AppMoMoLib.getInstance().setEnvironment(AppMoMoLib.ENVIRONMENT.DEVELOPMENT); // AppMoMoLib.ENVIRONMENT.PRODUCTION
+        binding.recyclerviewPayment.setLayoutManager(new LinearLayoutManager(getContext()));
         loaddata();
+        setTotal();
         EventClickAddressPayment();
         EventClickPaymentDone();
         getdataYourAddress();
         return view;
     }
-    private void getdataYourAddress() {
-        getParentFragmentManager().setFragmentResultListener("data", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                address = result.getString("address");
-                selectedWardId = result.getInt("WardId");
-                selectedDistrictId = result.getInt("DistrictID");
-                loadApiFee(selectedDistrictId, String.valueOf(selectedWardId));
-                if(address!=null){
-                    binding.txtAddressPayment.setText(address);
-                }else{
-                    binding.txtAddressPayment.setText("+ Add Address");
-                }
-            }
-            //RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), "{ \"from_district_id\": 1454, \"from_ward_code\": \"21211\", \"service_id\": 53320, \"service_type_id\": null, \"to_district_id\": 1452, \"to_ward_code\": \"21012\", \"height\": 50, \"length\": 20, \"weight\": 200, \"width\": 20, \"insurance_value\": 10000, \"cod_failed_amount\": 2000, \"coupon\": null }");
-        });
-    }
-    private void EventClickPaymentDone() {
-        binding.btnPaymentDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(binding.txtAddressPayment.getText().toString().equals("+ Add Address")){
-                    Toast.makeText(getContext(),"Please add a shipping address",Toast.LENGTH_LONG).show();
-                }else if(binding.radioGroupPayment.getCheckedRadioButtonId()==-1){
-                    Toast.makeText(getContext(),"Select a payment method",Toast.LENGTH_LONG).show();
-                }else{
-                    if(binding.RadioBTNPaymentonDelivery.isChecked()){
-                        String PaymentMethod = "Payment to Delivery";
-                        String Status = "Processing";
-                        Calendar calendar = Calendar.getInstance();
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
-                        String formattedTime = dateFormat.format(calendar.getTime());
-                        addOrder(PaymentMethod,Status,TotalPayment,formattedTime,address);
-                        databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(String.valueOf(SignIn.phone));
-                        database = FirebaseDatabase.getInstance().getReference("Order").child(String.valueOf(SignIn.phone));
-                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                int NumberProduct = 0;
-                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                    String ID = database.push().getKey();
-                                    String productname = dataSnapshot.child("productName").getValue(String.class);
-                                    int price = dataSnapshot.child("price").getValue(int.class);
-                                    int quality = dataSnapshot.child("quality").getValue(int.class);
-                                    String ImageProduct = dataSnapshot.child("imageURL").getValue(String.class);
-                                    HashMap<String, Object> products = new HashMap<>();
-                                    products.put("productname",productname );
-                                    products.put("price",price);
-                                    products.put("quality",quality);
-                                    products.put("ImageProduct",ImageProduct);
-                                    NumberProduct+=1;
-                                    database.child(formattedTime).child("Products").child(ID).updateChildren(products);
-                                    database.child(formattedTime).child("NumberProduct").setValue(NumberProduct);
-                                }
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Toast.makeText(getContext(),"Cancel",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                    else{
-                        requestPayment();
-                    }
-                    databaseReference.removeValue();
-                    getFragmentManager().popBackStack();
-                    showDialog();
-                }
-            }
-        });
-    }
-    private void addOrder(String PaymentMethod,String Status, int total, String formattedTime,String DeliveryAddress){
-        HashMap order = new HashMap();
-        order.put("PaymentMethod",PaymentMethod );
-        order.put("Status",Status);
-        order.put("Total",total);
-        order.put("OrderPlace",formattedTime);
-        order.put("DeliveryAddress",DeliveryAddress);
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
-        databaseReference.child(formattedTime).setValue(order);
-    }
-    private void EventClickAddressPayment() {
-        binding.txtAddressPayment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                YourAddressFragment yourAddressFragment = new YourAddressFragment();
-                ((Home) requireActivity()).replaceFragment(yourAddressFragment);
-            }
-        });
-    }
-
     private void loaddata() {
-        binding.recyclerviewPayment.setLayoutManager(new LinearLayoutManager(getContext()));
         FirebaseRecyclerOptions<Cart> options =
                 new FirebaseRecyclerOptions.Builder<Cart>()
                         .setQuery(FirebaseDatabase.getInstance().getReference().child("Cart").child(String.valueOf(SignIn.phone)), Cart.class)
                         .build();
         paymentAdapter = new PaymentAdapter(options);
         binding.recyclerviewPayment.setAdapter(paymentAdapter);
+
+    }
+    private void setTotal(){
         databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(String.valueOf(SignIn.phone));
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -249,6 +166,105 @@ public class PaymentFragment extends Fragment {
             }
         });
     }
+
+    private void Payment(String PaymentMethod){
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
+        formattedTime = dateFormat.format(calendar.getTime());
+        addOrder(PaymentMethod,Status,TotalPayment,formattedTime,address);
+        createOrder();
+    }
+    private void createOrder(){
+        databaseReference = FirebaseDatabase.getInstance().getReference("Cart").child(String.valueOf(SignIn.phone));
+        database = FirebaseDatabase.getInstance().getReference("Order").child(String.valueOf(SignIn.phone));
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String ID = database.push().getKey();
+                    String productname = dataSnapshot.child("productName").getValue(String.class);
+                    int price = dataSnapshot.child("price").getValue(int.class);
+                    int quality = dataSnapshot.child("quality").getValue(int.class);
+                    String ImageProduct = dataSnapshot.child("imageURL").getValue(String.class);
+                    HashMap<String, Object> products = new HashMap<>();
+                    products.put("productname",productname );
+                    products.put("price",price);
+                    products.put("quality",quality);
+                    products.put("ImageProduct",ImageProduct);                    NumberProduct+=1;
+                    database.child(formattedTime).child("Products").child(ID).updateChildren(products);
+                    database.child(formattedTime).child("NumberProduct").setValue(NumberProduct);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(),"Cancel",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    private void addOrder(String PaymentMethod,String Status, int total, String formattedTime,String DeliveryAddress){
+        HashMap order = new HashMap();
+        order.put("PaymentMethod",PaymentMethod );
+        order.put("Status",Status);
+        order.put("Total",total);
+        order.put("OrderPlace",formattedTime);
+        order.put("DeliveryAddress",DeliveryAddress);
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("Order").child(String.valueOf(SignIn.phone));
+        databaseReference.child(formattedTime).setValue(order);
+    }
+    private void EventClickPaymentDone() {
+        binding.btnPaymentDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(binding.txtAddressPayment.getText().toString().equals("+ Add Address")){
+                    Toast.makeText(getContext(),"Please add a shipping address",Toast.LENGTH_LONG).show();
+                }else if(binding.radioGroupPayment.getCheckedRadioButtonId()==-1){
+                    Toast.makeText(getContext(),"Select a payment method",Toast.LENGTH_LONG).show();
+                }else{
+                    if(binding.RadioBTNPaymentonDelivery.isChecked()){
+                        String PaymentMethod = "Payment to Delivery";
+                        Payment(PaymentMethod);
+                        databaseReference.removeValue();
+                        showDialog();
+                        getFragmentManager().popBackStack();
+                    }
+                    else{
+                        requestPayment();
+                        String PaymentMethod = "Momo E-Wallet";
+                        Payment(PaymentMethod);
+                        databaseReference.removeValue();
+                        showDialog();
+                        getFragmentManager().popBackStack();
+                    }
+                }
+            }
+        });
+    }
+    private void EventClickAddressPayment() {
+        binding.txtAddressPayment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                YourAddressFragment yourAddressFragment = new YourAddressFragment();
+                ((Home) requireActivity()).replaceFragment(yourAddressFragment);
+            }
+        });
+    }
+    private void getdataYourAddress() {
+        getParentFragmentManager().setFragmentResultListener("data", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                address = result.getString("address");
+                selectedWardId = result.getInt("WardId");
+                selectedDistrictId = result.getInt("DistrictID");
+                loadApiFee(selectedDistrictId, String.valueOf(selectedWardId));
+                if(address!=null){
+                    binding.txtAddressPayment.setText(address);
+                }else{
+                    binding.txtAddressPayment.setText("+ Add Address");
+                }
+            }
+        });
+    }
+
     //Get token through MoMo app
     private void requestPayment() {
         AppMoMoLib.getInstance().setAction(AppMoMoLib.ACTION.PAYMENT);
@@ -256,10 +272,10 @@ public class PaymentFragment extends Fragment {
 
         Map<String, Object> eventValue = new HashMap<>();
         //client Required
-        eventValue.put("merchantname", merchantName); //Tên đối tác. được đăng ký tại https://business.momo.vn. VD: Google, Apple, Tiki , CGV Cinemas
+        eventValue.put("merchantname", "MaiDanhDung"); //Tên đối tác. được đăng ký tại https://business.momo.vn. VD: Google, Apple, Tiki , CGV Cinemas
         eventValue.put("merchantcode", merchantCode); //Mã đối tác, được cung cấp bởi MoMo tại https://business.momo.vn
-        eventValue.put("amount", amount); //Kiểu integer
-        eventValue.put("orderId", "orderId123456789"); //uniqueue id cho Bill order, giá trị duy nhất cho mỗi đơn hàng
+        eventValue.put("amount", TotalPayment); //Kiểu integer
+        eventValue.put("orderId", "MDD1210"); //uniqueue id cho Bill order, giá trị duy nhất cho mỗi đơn hàng
         eventValue.put("orderLabel", "Mã đơn hàng"); //gán nhãn
 
         //client Optional - bill info
@@ -293,7 +309,7 @@ public class PaymentFragment extends Fragment {
             if(data != null) {
                 if(data.getIntExtra("status", -1) == 0) {
                     //TOKEN IS AVAILABLE
-                    String token = data.getStringExtra("data"); //Token response
+                    token = data.getStringExtra("data"); //Token response
                     String phoneNumber = data.getStringExtra("phonenumber");
                     String env = data.getStringExtra("env");
                     if(env == null){
@@ -317,23 +333,6 @@ public class PaymentFragment extends Fragment {
         } else {
         }
 }
-    private void showDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setMessage("Order Success");
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // Delay 2 giây
-        Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (dialog != null && dialog.isShowing()) {
-                    dialog.dismiss();
-                }
-            }
-        };
-        handler.postDelayed(runnable, 2000);
-    }
     private void loadApiFee(int selectedDistrictId, String selectedWardId){
         String Token = "804559c8-14d0-11ee-8430-a61cf7de0a67";
         int ShopId = 124927;
@@ -361,6 +360,24 @@ public class PaymentFragment extends Fragment {
             }
         });
     }
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage("Order Success");
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        // Delay 2 giây
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+            }
+        };
+        handler.postDelayed(runnable, 2000);
+    }
+
     @Override
     public void onStart() {
         super.onStart();

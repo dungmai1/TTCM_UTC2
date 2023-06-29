@@ -57,6 +57,8 @@ public class AddAdressFragment extends Fragment {
     String selectedSubDistrictName;
     String selectedProvinceName;
     String token = "804559c8-14d0-11ee-8430-a61cf7de0a67";
+    String name,streetaddress,phoneString;
+    int phone = 0;
 
 
     public AddAdressFragment() {
@@ -90,7 +92,6 @@ public class AddAdressFragment extends Fragment {
         }
 
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -99,16 +100,20 @@ public class AddAdressFragment extends Fragment {
         binding = FragmentAddAdressBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
         loadProvince();
+        EventClickSave();
+        return view;
+    }
+
+    private void EventClickSave() {
         binding.btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 selectedDistrictName = binding.spinnerDistrict.getSelectedItem().toString();
                 selectedProvinceName = binding.spinnerProvince.getSelectedItem().toString();
                 selectedSubDistrictName = binding.spinnerSubdistrict.getSelectedItem().toString();
-                String name = binding.editTextName.getText().toString();
-                String streetaddress = binding.editTextAddress.getText().toString();
-                String phoneString = binding.editTextPhone.getText().toString();
-                int phone = 0;
+                name = binding.editTextName.getText().toString();
+                streetaddress = binding.editTextAddress.getText().toString();
+                phoneString = binding.editTextPhone.getText().toString();
                 if (name.isEmpty()) {
                     binding.editTextName.setError("Please enter a name");
                 }
@@ -126,17 +131,20 @@ public class AddAdressFragment extends Fragment {
                     binding.editTextPhone.setError("Please enter a valid phone number");
                 }
                 if (!name.isEmpty() || !streetaddress.isEmpty() || !phoneString.isEmpty()) {
-                    databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
-                    String ID = databaseReference.push().getKey();
-                    Address address = new Address(name, selectedProvinceName, selectedDistrictName, selectedSubDistrictName, streetaddress, phone,Integer.parseInt(selectedWardId),selectedDistrictId);
-                    databaseReference.child(ID).setValue(address);
+                    CreateAddress();
                     Toast.makeText(getContext(), "Add new address succesfully", Toast.LENGTH_LONG).show();
                     getFragmentManager().popBackStack();
                 }
             }
         });
-        return view;
     }
+    private void CreateAddress(){
+        databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
+        String ID = databaseReference.push().getKey();
+        Address address = new Address(name, selectedProvinceName, selectedDistrictName, selectedSubDistrictName, streetaddress, phone,Integer.parseInt(selectedWardId),selectedDistrictId);
+        databaseReference.child(ID).setValue(address);
+    }
+
     private void loadProvince() {
         ApiService.apiGHN.getProvince(token).enqueue(new Callback<Province>() {
             @Override

@@ -123,24 +123,6 @@ public class YourAddressFragment extends Fragment implements AddressAdapter.IAdd
         addressAdapter = new AddressAdapter(options,addressArrayList,this);
         binding.recyclerviewAddress.setAdapter(addressAdapter);
 
-//        binding.recyclerviewAddress.setLayoutManager(new LinearLayoutManager(getContext()));
-//        databaseReference = FirebaseDatabase.getInstance().getReference("Address").child(String.valueOf(SignIn.phone));
-//        addressArrayList = new ArrayList<>();
-//        addressAdapter = new AddressAdapter(getActivity(), addressArrayList,this);
-//        binding.recyclerviewAddress.setAdapter(addressAdapter);
-//        databaseReference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-//                    Address address = dataSnapshot.getValue(Address.class);
-//                    addressArrayList.add(address);
-//                }
-//                addressAdapter.notifyDataSetChanged();
-//            }
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//            }
-//        });
     }
 
     private void EventClickAddnewAddress() {

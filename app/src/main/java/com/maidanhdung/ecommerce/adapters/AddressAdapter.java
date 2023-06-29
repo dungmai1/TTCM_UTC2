@@ -47,14 +47,10 @@ public class AddressAdapter extends FirebaseRecyclerAdapter<Address,AddressAdapt
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_address,parent,false);
         return new ViewHolder(view);
     }
-
     @Override
     protected void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Address address) {
-        holder.txtAddress.setText(address.getName() + "," +
-                address.getProvince() + "," +
-                address.getDistrict() + "," +
-                address.getSubDistrict() + "," +
-                address.getStreetAddress());
+        holder.txtAddress.setText(address.getName() + ", " +address.getStreetAddress()+", "
+                +address.getSubDistrict()+", "+ address.getDistrict()+", "+address.getProvince());
         holder.radioButton.setChecked(position == SelectedPosition);
         holder.radioButton.setOnClickListener(new View.OnClickListener() {
             @Override
